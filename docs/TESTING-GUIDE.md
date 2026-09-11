@@ -111,8 +111,24 @@ Sign in as **Owner** and open **Inbox**.
 
 ## 6. Contacts
 
-Open **Contacts**. **Expect:** a table of 30 seeded contacts with name, email,
-phone, company and consent badge. (Import/export/merge are labelled build-outs.)
+Open **Contacts**. **Expect:** a table of seeded contacts with name, email,
+phone, company and consent badge.
+
+### 6b. CSV import
+
+1. **Import CSV** → the import wizard.
+2. **Upload** a `.csv` whose first row is headers (e.g. `First Name,Last Name,
+   Email,Phone,Company,Tags`). Drag-drop or pick a file (≤5 MB).
+3. **Map & review:** columns are auto-mapped from the headers — adjust any.
+   **Expect:** validation counts (ready to import / invalid email / no email or
+   phone / duplicates in file) and a live preview of the first rows.
+4. **Consent:** choose *Unknown* or *Opted in* (+ a source) — consent is recorded
+   per contact and gates who can receive broadcasts.
+5. **Import.** **Expect:** a summary — **Created / Updated / Skipped / Tags
+   linked**. Existing contacts (matched by email or phone) are **updated**, not
+   duplicated; rows with no email/phone are skipped; invalid emails are dropped
+   but the contact is still imported if it has a phone. New tags are created and
+   linked. Open **Contacts** to see the results.
 
 ---
 

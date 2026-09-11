@@ -227,6 +227,21 @@ server.
   opted-out) are aggregated from `broadcast_recipients` and shown as a stacked
   bar + legend.
 
+## 7d. CSV contact import
+
+- **Parser** (`lib/contacts/csv.ts`): a dependency-free RFC-4180-ish parser
+  (quotes, escaped quotes, embedded commas/newlines, BOM), plus header
+  auto-mapping via synonyms and an email validator.
+- **Wizard** (`/app/contacts/import`, client): **Upload** (drag/drop or picker,
+  ≤5 MB, `.csv` only) → **Map & review** (auto-guessed column mapping, a live
+  preview, and validation counts: ready / invalid email / no identifier / in-file
+  duplicates) → **Consent** capture (unknown vs opted-in + source) → **Import**.
+- **Import** (`importContactsAction`): validates each row (needs email or phone),
+  **de-duplicates against existing contacts by email/phone** (updates matches,
+  merging only provided fields; inserts the rest), upserts and links **tags**, and
+  writes **consent_records** when opted-in. Returns a created/updated/skipped/
+  tags summary. Capped at 5000 rows; a production build would stream larger files.
+
 ## 8. Data model (overview)
 
 ~60 tables across `0001`–`0007`, grouped:
@@ -298,12 +313,13 @@ contacts table · reports (real metrics + charts) · **chatbot builder**
 (canvas/validate/test/save/publish/version) · **automation-rule builder**
 (triggers/conditions/actions, reorder, test, run history) · **broadcast composer**
 (consent-enforced audience, personalisation, approval, scheduling, delivery
-tracking) · data-backed lists for AI agents, knowledge, integrations, settings.
+tracking) · **CSV contact import** (mapping, validation, dedupe, tags, consent) ·
+data-backed lists for AI agents, knowledge, integrations, settings.
 
 **Honest build-outs (labelled in the UI):** the live event-driven automation
 engine (rules are built, ordered, evaluated and tested now) · live message
 delivery to providers (broadcasts record recipients and simulate delivery in demo
-mode) · live channel adapters + inbound webhooks · CSV import/merge · knowledge
+mode) · live channel adapters + inbound webhooks · CSV export · knowledge
 document upload & re-indexing · full settings subpages · presence/typing
 indicators · Vitest/Playwright suites.
 

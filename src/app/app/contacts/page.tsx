@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Users, Upload, Download, Plus } from "lucide-react";
 import { getAppContext } from "@/lib/auth/context";
 import { createClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export default async function ContactsPage() {
         description="Your unified customer database across every channel."
         actions={
           <>
-            <Button variant="outline" size="sm"><Upload className="size-4" /> Import CSV</Button>
+            <Link href="/app/contacts/import"><Button variant="outline" size="sm"><Upload className="size-4" /> Import CSV</Button></Link>
             <Button variant="outline" size="sm"><Download className="size-4" /> Export</Button>
             <Button size="sm"><Plus className="size-4" /> New contact</Button>
           </>
