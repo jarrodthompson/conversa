@@ -111,8 +111,9 @@ the code for a session and redirects onward.
 
 `lib/auth/roles.ts` maps the 7 roles (Platform Admin, Owner, Org Admin, Support
 Manager, Support Agent, Marketing, Reporting) to capability keys
-(`inbox.view`, `broadcasts.manage`, …). `PrimarySidebar` shows only the modules
-a role can access; server actions still re-check on the server.
+(`inbox.view`, `automations.manage`, `broadcasts.manage`, …). `PrimarySidebar`
+shows only the modules a role can access; server actions still re-check on the
+server.
 
 ---
 
@@ -185,6 +186,24 @@ a role can access; server actions still re-check on the server.
 
 ---
 
+## 7b. Automation rules
+
+- **Model:** `automation_rules (trigger_type, trigger_config, conditions[],
+  actions[], status, position)` with an `automation_runs` history table.
+- **Catalogue** (`lib/automations/catalogue.ts`): 10 triggers, 7 condition
+  fields × 4 operators, and 12 action types.
+- **List** (`/app/automations`): rules ordered by `position`, **drag-to-reorder**
+  (dnd-kit sortable, persisted), enable/disable switch, delete.
+- **Editor** (`/app/automations/[id]`): a **When → If → Then** form — pick a
+  trigger (+inline config), add AND-ed conditions (field/operator/value), and add
+  actions (each with its own parameter). Saved via a server action.
+- **Test** (`lib/automations/evaluate.ts` + `testRuleAction`): evaluates the
+  rule's conditions against your most recent conversation, records an
+  `automation_runs` row (success/skipped), and shows which actions *would* run.
+- The live event-driven engine (firing rules automatically on events, with the
+  `automation_runs.depth` loop-protection column) is a labelled build-out;
+  ordering, storage, evaluation and history are in place.
+
 ## 8. Data model (overview)
 
 ~60 tables across `0001`–`0007`, grouped:
@@ -253,13 +272,15 @@ See `.env.example` for all variables. Key ones:
 onboarding org creation · org switching & role-gated nav · shared inbox
 (reply/note/AI-draft/assign/priority/resolve/reopen) · **inbox realtime** ·
 contacts table · reports (real metrics + charts) · **chatbot builder**
-(canvas/validate/test/save/publish/version) · data-backed lists for AI agents,
-knowledge, broadcasts, integrations, settings.
+(canvas/validate/test/save/publish/version) · **automation-rule builder**
+(triggers/conditions/actions, reorder, test, run history) · data-backed lists for
+AI agents, knowledge, broadcasts, integrations, settings.
 
-**Honest build-outs (labelled in the UI):** automation-rule builder UI · broadcast
-composer & segments · live channel adapters + inbound webhooks (demo adapters
-now) · CSV import/merge · knowledge document upload & re-indexing · full settings
-subpages · presence/typing indicators · Vitest/Playwright suites.
+**Honest build-outs (labelled in the UI):** the live event-driven automation
+engine (rules are built, ordered, evaluated and tested now) · broadcast composer
+& segments · live channel adapters + inbound webhooks (demo adapters now) · CSV
+import/merge · knowledge document upload & re-indexing · full settings subpages ·
+presence/typing indicators · Vitest/Playwright suites.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.

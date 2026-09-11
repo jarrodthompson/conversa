@@ -166,6 +166,28 @@ Open **Chatbots**.
 
 ---
 
+## 10b. Automations ⚡
+
+Open **Automations** (sign in as Owner or Manager).
+
+1. **List:** see the 3 seeded rules with an order number, trigger, condition/
+   action counts and an **Active/Off** toggle.
+2. **Reorder:** drag a rule by its grip handle to change its order — the new
+   order is saved.
+3. **Enable/disable:** click a rule's toggle. **Expect:** a toast and the badge
+   flips between Active/Off.
+4. **Edit:** click the pencil to open the **When → If → Then** editor. Change the
+   trigger, **Add condition** (field / operator / value), **Add action** (type +
+   parameter), then **Save**. **Expect:** a “Rule saved” toast.
+5. **Test:** click **Test**. **Expect:** the right panel shows whether the
+   conditions **matched** your most recent conversation, a ✓/✕ per condition,
+   which actions *would* run, and a new entry under **Recent runs**.
+6. **New rule:** back on the list, **New rule** creates a blank disabled rule and
+   opens its editor.
+
+> The live engine that fires rules automatically on real events is a labelled
+> build-out; building, ordering, evaluating and testing rules all work now.
+
 ## 11. Broadcasts / Integrations / Settings / Notifications
 
 - **Broadcasts:** 2 seeded campaigns (one sent, one scheduled) with channel and

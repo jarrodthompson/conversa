@@ -27,6 +27,7 @@ export type Capability =
   | "ai.view"
   | "ai.manage"
   | "chatbots.manage"
+  | "automations.manage"
   | "broadcasts.view"
   | "broadcasts.manage"
   | "reports.view"
@@ -37,8 +38,8 @@ export type Capability =
 
 const ALL: Capability[] = [
   "inbox.view", "inbox.reply", "contacts.view", "contacts.manage",
-  "ai.view", "ai.manage", "chatbots.manage", "broadcasts.view",
-  "broadcasts.manage", "reports.view", "knowledge.manage",
+  "ai.view", "ai.manage", "chatbots.manage", "automations.manage",
+  "broadcasts.view", "broadcasts.manage", "reports.view", "knowledge.manage",
   "integrations.manage", "settings.manage", "team.manage",
 ];
 
@@ -48,8 +49,8 @@ const ROLE_CAPS: Record<Role, Capability[]> = {
   org_admin: ALL,
   support_manager: [
     "inbox.view", "inbox.reply", "contacts.view", "contacts.manage",
-    "ai.view", "ai.manage", "chatbots.manage", "reports.view",
-    "knowledge.manage", "team.manage",
+    "ai.view", "ai.manage", "chatbots.manage", "automations.manage",
+    "reports.view", "knowledge.manage", "team.manage",
   ],
   support_agent: ["inbox.view", "inbox.reply", "contacts.view", "ai.view", "knowledge.manage"],
   marketing: ["broadcasts.view", "broadcasts.manage", "contacts.view", "contacts.manage", "reports.view"],
