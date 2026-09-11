@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Conversa design system.
+ * Palette and radii are the single source of truth for the whole product.
+ * Swap the values under :root to re-brand the entire application.
+ */
+
+@theme {
+  /* Brand */
+  --color-cyan-50: #ecfeff;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+  --color-cyan-600: #0891b2;
+
+  /* Semantic tokens (referenced by components via bg-background, text-foreground, …) */
+  --color-background: #f5fafc;
+  --color-foreground: #102a3a;
+  --color-card: #ffffff;
+  --color-card-foreground: #102a3a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #102a3a;
+
+  --color-primary: #06b6d4;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #ecfeff;
+  --color-secondary-foreground: #0e7490;
+
+  --color-muted: #ecfeff;
+  --color-muted-foreground: #647985;
+  --color-accent: #ecfeff;
+  --color-accent-foreground: #0e7490;
+
+  --color-border: #dceaf0;
+  --color-input: #dceaf0;
+  --color-ring: #22d3ee;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-whatsapp: #25d366;
+
+  /* Sidebar (dark navy) */
+  --color-sidebar: #0b1f2a;
+  --color-sidebar-deep: #071521;
+  --color-sidebar-foreground: #cbd9e0;
+  --color-sidebar-muted: #7b95a2;
+  --color-sidebar-active: #06b6d4;
+  --color-sidebar-hover: #12303e;
+
+  /* Typography */
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Radii */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Accessible, consistent focus ring across interactive elements. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-cyan-400) 30%, transparent);
+  }
+
+  /* Thin, subtle scrollbars to match the enterprise aesthetic. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c3d6de transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #c3d6de;
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #a9c2cc;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Loading skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #e9f2f6 25%,
+      #f3f9fb 37%,
+      #e9f2f6 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0 50%;
+    }
+  }
 }
