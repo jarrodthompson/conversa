@@ -56,6 +56,14 @@ npm run dev
 
 Open <http://localhost:3000>.
 
+## Documentation
+
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — how every subsystem works
+  (auth, RLS/multi-tenancy, inbox, realtime, AI demo mode, chatbot builder, data
+  model, channels).
+- **[docs/TESTING-GUIDE.md](docs/TESTING-GUIDE.md)** — a click-by-click guide to
+  test every feature, including the realtime demo.
+
 ## Demo login
 
 After seeding, sign in at `/login`:

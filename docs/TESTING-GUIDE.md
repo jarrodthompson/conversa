@@ -1,0 +1,211 @@
+# Conversa — Testing guide
+
+A click-by-click walkthrough to exercise every feature and see what works.
+For how it's built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+---
+
+## 0. Start the app
+
+```bash
+npm install          # first time only
+npm run dev          # or: node node_modules/next/dist/bin/next dev  (if npm not on PATH)
+```
+
+Open **http://localhost:3000**.
+
+> The database is already migrated and seeded. To reset demo data at any time:
+> `npm run db:seed` (this clears and recreates the demo org).
+
+### Demo accounts (all share the password `ConversaDemo!23`)
+
+| Email                          | Role            | What they can see                          |
+| ------------------------------ | --------------- | ------------------------------------------ |
+| `ava.owner@conversa.demo`      | Owner           | Everything                                 |
+| `noah.manager@conversa.demo`   | Support Manager | Inbox, contacts, AI, chatbots, reports, team |
+| `priya.agent@conversa.demo`    | Support Agent   | Inbox, contacts, knowledge (no broadcasts/settings) |
+| `sara.marketing@conversa.demo` | Marketing       | Broadcasts, contacts, reports              |
+
+---
+
+## 1. Marketing site (no login)
+
+1. Go to `/`. **Expect:** announcement bar, hero “Every conversation. One
+   intelligent workspace.”, a four-column inbox preview, feature sections,
+   pricing (marked as demo), footer.
+2. Top-nav links (AI Agents, Pricing, About…) and **Start free** / **Sign in**.
+
+---
+
+## 2. Authentication
+
+1. **Register:** `/register` → enter a name, email, password (≥8 chars, a letter
+   + a number). **Expect:** if email confirmation is on in Supabase, a “check
+   your inbox” message; otherwise you go to `/onboarding`.
+2. **Protected routes:** while signed out, visit `/app/inbox`. **Expect:**
+   redirect to `/login`.
+3. **Login:** `/login` with `ava.owner@conversa.demo` / `ConversaDemo!23`.
+   **Expect:** redirect to `/app/inbox`.
+4. **Forgot/reset:** `/forgot-password` → enter an email → **Expect:** a neutral
+   “if that email exists…” confirmation (no account enumeration).
+5. **Sign out:** top-right avatar → **Sign out** → back to `/login`.
+
+---
+
+## 3. Onboarding (create a new organisation)
+
+1. Sign out, register a brand-new email, or use the org switcher →
+   **New organisation**.
+2. At `/onboarding`, enter an organisation name + industry → **Create workspace**.
+   **Expect:** a new org with a default team + inbox is created, you become its
+   **Owner**, and you land on an (empty) inbox. This proves tenant creation and
+   isolation — the new org sees none of Grovefield's data.
+
+---
+
+## 4. Roles & organisation switching
+
+1. As Owner, click the **org selector** (top bar). **Expect:** your orgs listed;
+   switching sets the active org.
+2. Sign in as `priya.agent@conversa.demo`. **Expect:** the left icon sidebar
+   shows **fewer** modules (no Broadcasts/Integrations/Settings) — role gating.
+3. Sign in as `sara.marketing@conversa.demo`. **Expect:** Broadcasts, Contacts,
+   Reports emphasised; no Inbox management tools.
+
+---
+
+## 5. Shared inbox (core)
+
+Sign in as **Owner** and open **Inbox**.
+
+1. **Views:** click My Inbox / Unassigned / Waiting / Resolved / AI Handled /
+   Spam. **Expect:** the list and the counts change per view.
+2. **Open a conversation:** click a row. **Expect:** column 3 shows the message
+   timeline (customer + agent/AI bubbles, internal notes, AI summary), column 4
+   shows Ticket + Contact + Sentiment.
+3. **Reply:** type in the composer → **Send**. **Expect:** your message appears
+   at the bottom, the list preview + timestamp update.
+4. **Internal note:** switch to **Internal note**, type, **Add note**.
+   **Expect:** a yellow internal-note block (not sent to the customer).
+5. **AI draft (demo):** click **AI draft**. **Expect:** a labelled draft is
+   inserted into the composer for you to review — clearly demo mode.
+6. **Send & resolve:** type a reply → **Send & resolve**. **Expect:** message
+   sent and the conversation becomes Resolved.
+7. **Assign / priority / resolve:** use the header buttons — **Assign to me**,
+   the **priority** menu, **Resolve/Reopen**. **Expect:** toasts confirm and the
+   details panel updates.
+
+### 5b. Realtime (live updates) — the fun one
+
+1. Keep the **Inbox** open in your browser. Note the green **● Live** indicator
+   next to the list header.
+2. In a terminal, emit an inbound message from “a customer”:
+   ```bash
+   npx tsx scripts/emit-test-message.ts "Any update on my order? (realtime test)"
+   ```
+3. **Expect (no reload):** the target conversation jumps to the top of the list
+   with the new preview and a fresh timestamp; if it's the open thread, the new
+   inbound bubble appears in the timeline within ~1s.
+
+---
+
+## 6. Contacts
+
+Open **Contacts**. **Expect:** a table of 30 seeded contacts with name, email,
+phone, company and consent badge. (Import/export/merge are labelled build-outs.)
+
+---
+
+## 7. Reports
+
+Open **Reports**. **Expect:** KPI cards (total, resolved, AI containment %, SLA
+breaches), a **Conversations by channel** bar chart and a **By status** pie chart,
+plus response-time tiles. Numbers are derived from the seeded conversations.
+
+---
+
+## 8. AI Agents
+
+Open **AI Agents**. **Expect:** a **demo-mode** banner and the seeded
+“Grove Assistant” card (published, friendly tone, channels). Configure / sandbox
+buttons are placeholders for the agent build-out.
+
+---
+
+## 9. Knowledge base
+
+Open **Knowledge**. **Expect:** 10 seeded articles with source type, index status
+(indexed) and published/draft badges.
+
+---
+
+## 10. Chatbot builder ⭐
+
+Open **Chatbots**.
+
+1. **Open the seeded flow:** “Website Welcome Bot” → **Open builder**.
+2. **Canvas:** drag the background to **pan**; use the bottom-left **zoom**
+   controls; see the **minimap** (bottom-right) and the **● Valid** status.
+3. **Add a node:** click any node in the left **palette** (e.g. *Ask Question*).
+   **Expect:** it appears on the canvas and is selected; edit its fields in the
+   right **settings panel**.
+4. **Connect:** click a node's **output handle** (small dot on its bottom edge),
+   then click a **target node**. **Expect:** a cyan arrow connects them. Click an
+   edge to delete it.
+5. **Move nodes:** drag a node — it repositions and edges follow.
+6. **Validate:** delete the connection into a node → the toolbar shows an
+   **issue** count; open it to see “… has no outgoing connection” / “unreachable”.
+7. **Test simulator:** click **Test** → **Start test**. Play the flow: you'll see
+   the welcome message and choice buttons; pick **Talk to a human** → **Expect:**
+   it routes to the **Human Handoff** terminal step.
+8. **Save / Publish:** **Save** stores the draft; **Publish** validates, creates a
+   new **version** (see the **v#** history) and marks the flow published.
+   **Duplicate** clones the flow.
+9. **New flow:** back on the list, **New flow** creates a blank flow (just a Start
+   node) and opens the builder.
+
+---
+
+## 11. Broadcasts / Integrations / Settings / Notifications
+
+- **Broadcasts:** 2 seeded campaigns (one sent, one scheduled) with channel and
+  status. Composer/segments are a labelled build-out.
+- **Integrations:** all six channels shown; seeded ones display **Demo mode**.
+  Live connection forms are the adapter build-out.
+- **Settings:** organisation details + the team & roles list (6 members).
+  **My Profile** shows your account + role.
+- **Notifications:** empty-state until mentions/assignments/SLA events are wired.
+
+---
+
+## 12. Verify multi-tenant isolation (security)
+
+1. Note a contact/conversation in Grovefield (as Owner).
+2. Create a **new organisation** via onboarding (a fresh workspace).
+3. Switch to it. **Expect:** the inbox, contacts and reports are **empty** — none
+   of Grovefield's data leaks across. This is enforced by RLS, not just the UI.
+
+---
+
+## 13. Quality gates
+
+```bash
+npm run typecheck   # expect: no errors
+npm run lint        # expect: no errors
+```
+
+---
+
+## Troubleshooting
+
+- **`npm not found`** (Windows PATH quirk): run
+  `node node_modules/next/dist/bin/next dev`.
+- **DB host won't resolve:** new Supabase projects use the **connection pooler**
+  host (`aws-0-<region>.pooler.supabase.com`, user `postgres.<ref>`), not
+  `db.<ref>.supabase.co`. Copy the pooler URI from Dashboard → Settings →
+  Database and put it in `SUPABASE_DB_URL`.
+- **Realtime shows “Offline”:** confirm migration `0009` was applied
+  (`npm run db:push`), that you're signed in, and that the anon key in
+  `.env.local` matches the project.
+- **Seed says a value is missing:** ensure `NEXT_PUBLIC_SUPABASE_URL`,
+  `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_DB_URL` are all set in `.env.local`.
