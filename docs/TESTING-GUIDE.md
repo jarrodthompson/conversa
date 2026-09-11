@@ -244,12 +244,23 @@ Open **Broadcasts** (Owner or Marketing).
 
 ---
 
-## 13. Quality gates
+## 13. Quality gates & automated tests
 
 ```bash
-npm run typecheck   # expect: no errors
-npm run lint        # expect: no errors
+npm run typecheck        # expect: no errors
+npm run lint             # expect: no errors
+npm run test:unit        # Vitest unit tests (no DB) — expect all pass
+npm run test:integration # Vitest RLS/tenant-isolation + ticket transitions (needs .env.local)
+npm test                 # unit + integration together
+npm run test:e2e         # Playwright auth + inbox (needs a running app + `npx playwright install chromium`)
 ```
+
+- **Unit** cover roles/permissions, CSV parsing/mapping, chatbot validation &
+  simulation, automation conditions, broadcast audience/consent, and auth schemas.
+- **Integration** prove tenant isolation under RLS (a non-member cannot read or
+  write another org's data) and the ticket status-history trigger.
+- **E2E** cover protected-route redirect, sign-in/out, and opening a conversation
+  and sending a reply.
 
 ---
 

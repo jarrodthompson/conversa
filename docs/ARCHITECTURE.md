@@ -304,6 +304,24 @@ See `.env.example` for all variables. Key ones:
 
 ---
 
+## 10b. Testing
+
+- **Vitest** (`tests/unit`, `tests/integration`):
+  - **Unit** (no DB): role capabilities, the CSV parser + auto-mapping + email
+    validation, chatbot validation + simulation, automation condition evaluation,
+    broadcast audience resolution (consent/suppression/tags via a stub client) +
+    personalisation, and the Zod auth schemas.
+  - **Integration** (live Supabase, auto-skipped without env): **RLS tenant
+    isolation** — an ephemeral outsider in another org cannot read or write
+    grovefield's conversations/contacts/messages, while a member can; and
+    **ticket transitions** — the status-history trigger fires on change (and not
+    on a no-op), plus a member message write+read under RLS.
+- **Playwright** (`tests/e2e`): critical **auth** flows (protected-route
+  redirect, sign-in, sign-out) and **inbox** (open a conversation + send a reply,
+  view filtering). Config reuses a running dev server.
+- Commands: `npm run test:unit`, `npm run test:integration`, `npm test` (both),
+  `npm run test:e2e`. E2E needs `npx playwright install chromium` once.
+
 ## 11. What's live vs. still a build-out
 
 **Fully working:** design system · auth (register/login/verify/reset) ·
@@ -321,7 +339,7 @@ engine (rules are built, ordered, evaluated and tested now) · live message
 delivery to providers (broadcasts record recipients and simulate delivery in demo
 mode) · live channel adapters + inbound webhooks · CSV export · knowledge
 document upload & re-indexing · full settings subpages · presence/typing
-indicators · Vitest/Playwright suites.
+indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.

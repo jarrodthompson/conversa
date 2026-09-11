@@ -13,6 +13,8 @@
     "db:types": "tsx scripts/gen-types.ts",
     "db:reset": "tsx scripts/apply-migrations.ts && tsx scripts/seed.ts",
     "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -39,6 +41,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",
@@ -50,6 +53,8 @@
     "pg": "^8.23.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
   }
 }

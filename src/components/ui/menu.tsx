@@ -50,7 +50,9 @@ export function Menu({ trigger, children, align = "end", className }: MenuProps)
             align === "end" ? "right-0" : "left-0",
             className,
           )}
-          onClick={() => setOpen(false)}
+          // Defer closing so an item's own action (e.g. a form submit / server
+          // action) runs before the menu content unmounts.
+          onClick={() => setTimeout(() => setOpen(false), 0)}
         >
           {children}
         </div>
