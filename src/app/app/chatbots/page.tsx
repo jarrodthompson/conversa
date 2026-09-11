@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Workflow, Plus } from "lucide-react";
 import { getAppContext } from "@/lib/auth/context";
 import { createClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/app/empty-state";
+import { createFlowAction } from "@/lib/chatbots/actions";
 
 interface Flow {
   id: string; name: string; description: string | null; status: string;
@@ -27,7 +29,11 @@ export default async function ChatbotsPage() {
       <PageHeader
         title="Chatbots"
         description="Visual conversation flows. The drag-and-drop canvas editor opens from each flow."
-        actions={<Button size="sm"><Plus className="size-4" /> New flow</Button>}
+        actions={
+          <form action={createFlowAction}>
+            <Button size="sm" type="submit"><Plus className="size-4" /> New flow</Button>
+          </form>
+        }
       />
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {flows.length === 0 ? (
@@ -43,7 +49,9 @@ export default async function ChatbotsPage() {
                 <h3 className="mt-3 font-semibold">{f.name}</h3>
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{f.description}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{(f.definition?.nodes?.length ?? 0)} nodes · {f.channels.join(", ") || "no channel"}</p>
-                <Button variant="outline" size="sm" className="mt-4">Open builder</Button>
+                <Link href={`/app/chatbots/${f.id}`}>
+                  <Button variant="outline" size="sm" className="mt-4">Open builder</Button>
+                </Link>
               </CardContent>
             </Card>
           ))

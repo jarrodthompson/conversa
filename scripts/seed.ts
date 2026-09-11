@@ -404,13 +404,13 @@ async function main() {
       { id: "msg1", type: "send_message", position: { x: 80, y: 200 }, data: { message: "Welcome to Grovefield! How can we help?" } },
       { id: "choice", type: "multiple_choice", position: { x: 80, y: 320 }, data: { options: ["Track order", "Returns", "Talk to a human"] } },
       { id: "handoff", type: "human_handoff", position: { x: 320, y: 440 }, data: { team: "Support" } },
-      { id: "end", type: "end_conversation", position: { x: 80, y: 560 }, data: {} },
+      { id: "end", type: "end", position: { x: 80, y: 560 }, data: {} },
     ],
     edges: [
       { id: "e1", source: "start", target: "msg1" },
       { id: "e2", source: "msg1", target: "choice" },
-      { id: "e3", source: "choice", target: "handoff" },
-      { id: "e4", source: "handoff", target: "end" },
+      { id: "e3", source: "choice", target: "handoff", sourceHandle: "opt2" },
+      { id: "e4", source: "choice", target: "end", sourceHandle: "opt0" },
     ],
   };
   await db.from("chatbot_flows").insert([
