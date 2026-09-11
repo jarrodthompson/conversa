@@ -11,6 +11,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Composer } from "@/components/inbox/composer";
 import { ConversationActions } from "@/components/inbox/conversation-actions";
+import { InboxRealtime } from "@/components/inbox/realtime";
 import { EmptyState } from "@/components/app/empty-state";
 import {
   ChannelIcon, STATUS_META, PRIORITY_META, contactName,
@@ -80,7 +81,10 @@ export default async function InboxPage({
       <section className="flex min-h-0 flex-col border-r border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="text-sm font-semibold capitalize">{VIEW_ITEMS.find((v) => v.key === view)?.label ?? view}</h3>
-          <span className="text-xs text-muted-foreground">{rows.length} shown</span>
+          <div className="flex items-center gap-3">
+            <InboxRealtime orgId={org.id} />
+            <span className="text-xs text-muted-foreground">{rows.length} shown</span>
+          </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {rows.length === 0 ? (
