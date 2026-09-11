@@ -204,6 +204,29 @@ server.
   `automation_runs.depth` loop-protection column) is a labelled build-out;
   ordering, storage, evaluation and history are in place.
 
+## 7c. Broadcast composer
+
+- **Audience** (`lib/broadcasts/audience.ts`): `resolveAudience` resolves the
+  eligible recipients for a channel + segment (tags / company / search),
+  **enforcing consent** (`consent_status = opted_in`) and the **suppression
+  list**, and requiring a usable channel identifier. It returns the eligible
+  contacts plus excluded counts (no consent / suppressed / no address).
+- **Personalisation** (`lib/broadcasts/personalize.ts`): `{{first_name}}`,
+  `{{last_name}}`, `{{company}}` are detected and substituted per recipient; the
+  composer shows a live preview.
+- **Composer** (`/app/broadcasts/[id]`): message (channel, optional approved
+  template, body + variable chips + preview) · audience (tag filters, consent
+  toggle, **Preview audience** with live counts) · schedule (send now / schedule,
+  frequency cap) · a right rail for **send test**, **approval gate**, and
+  **dispatch**.
+- **Dispatch** (`dispatchBroadcastAction`): requires approval, materialises the
+  eligible audience into `broadcast_recipients` (idempotent upsert per
+  broadcast+contact), then schedules or **simulates delivery** (demo — no live
+  provider is contacted) and records per-recipient statuses.
+- **Delivery tracking:** metrics (queued/sent/delivered/read/replied/failed/
+  opted-out) are aggregated from `broadcast_recipients` and shown as a stacked
+  bar + legend.
+
 ## 8. Data model (overview)
 
 ~60 tables across `0001`–`0007`, grouped:
@@ -273,14 +296,16 @@ onboarding org creation · org switching & role-gated nav · shared inbox
 (reply/note/AI-draft/assign/priority/resolve/reopen) · **inbox realtime** ·
 contacts table · reports (real metrics + charts) · **chatbot builder**
 (canvas/validate/test/save/publish/version) · **automation-rule builder**
-(triggers/conditions/actions, reorder, test, run history) · data-backed lists for
-AI agents, knowledge, broadcasts, integrations, settings.
+(triggers/conditions/actions, reorder, test, run history) · **broadcast composer**
+(consent-enforced audience, personalisation, approval, scheduling, delivery
+tracking) · data-backed lists for AI agents, knowledge, integrations, settings.
 
 **Honest build-outs (labelled in the UI):** the live event-driven automation
-engine (rules are built, ordered, evaluated and tested now) · broadcast composer
-& segments · live channel adapters + inbound webhooks (demo adapters now) · CSV
-import/merge · knowledge document upload & re-indexing · full settings subpages ·
-presence/typing indicators · Vitest/Playwright suites.
+engine (rules are built, ordered, evaluated and tested now) · live message
+delivery to providers (broadcasts record recipients and simulate delivery in demo
+mode) · live channel adapters + inbound webhooks · CSV import/merge · knowledge
+document upload & re-indexing · full settings subpages · presence/typing
+indicators · Vitest/Playwright suites.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.

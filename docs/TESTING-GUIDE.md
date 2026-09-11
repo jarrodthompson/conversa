@@ -188,10 +188,29 @@ Open **Automations** (sign in as Owner or Manager).
 > The live engine that fires rules automatically on real events is a labelled
 > build-out; building, ordering, evaluating and testing rules all work now.
 
-## 11. Broadcasts / Integrations / Settings / Notifications
+## 11. Broadcasts (composer) 📣
 
-- **Broadcasts:** 2 seeded campaigns (one sent, one scheduled) with channel and
-  status. Composer/segments are a labelled build-out.
+Open **Broadcasts** (Owner or Marketing).
+
+1. **New broadcast** → opens the composer (a new draft).
+2. **Message:** choose a channel, optionally pick the approved `spring_sale`
+   template, or write a body. Click the `{{first_name}}` chip to insert a
+   variable — the **Preview** updates for a sample contact.
+3. **Audience:** click **Preview audience**. **Expect:** with WhatsApp + “Require
+   consent”, roughly **8 eligible / 22 no-consent / 0 suppressed / 30 total** —
+   consent is enforced (only opted-in contacts qualify). Add tag filters to
+   narrow it.
+4. **Schedule:** choose Send now or Schedule (+ optional frequency cap).
+5. **Approve → Send now.** **Expect:** the status becomes **sent** and the right
+   rail shows a **Delivery** breakdown (queued/sent/delivered/read/replied/
+   failed) across the eligible recipients.
+   *(Demo mode — recipients are recorded and delivery is simulated; no live
+   provider is contacted.)*
+6. **Send a test:** enter an address and click the send icon → a demo test is
+   logged.
+
+## 12b. Integrations / Settings / Notifications
+
 - **Integrations:** all six channels shown; seeded ones display **Demo mode**.
   Live connection forms are the adapter build-out.
 - **Settings:** organisation details + the team & roles list (6 members).
