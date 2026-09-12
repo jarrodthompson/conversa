@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getAppContext } from "@/lib/auth/context";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/app/page-header";
@@ -51,9 +52,17 @@ export default async function IntegrationsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {existing ? existing.name : `Connect ${meta.label} to route messages into your inbox.`}
                 </p>
-                <Button variant={connected ? "outline" : "primary"} size="sm" className="mt-4">
-                  {connected ? "Manage" : demo ? "Configure live" : "Connect"}
-                </Button>
+                {type === "email" ? (
+                  <Link href="/app/integrations/email">
+                    <Button variant={connected ? "outline" : "primary"} size="sm" className="mt-4">
+                      {connected ? "Manage" : "Configure live"}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant={connected ? "outline" : "primary"} size="sm" className="mt-4" disabled>
+                    {connected ? "Manage" : demo ? "Configure live" : "Connect"}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           );
