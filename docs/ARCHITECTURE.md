@@ -274,10 +274,30 @@ and knowledge), soft-delete via `deleted_at` where appropriate, and a
 Channels are modelled generically (`channel_type` enum: whatsapp, email,
 web_chat, messenger, instagram, sms). Each `channel` has a `channel_connection`
 holding **non-secret** config and a `secret_ref` (never the secret itself).
-Unconnected channels run a **demo adapter** (clearly labelled). Live adapters
-(WhatsApp Business Cloud API, email via Resend, Meta Messenger/Instagram) plug in
-behind the same shape with webhook endpoints + signature verification. WhatsApp
-uses the **official Meta Cloud API** architecture — no unofficial automation.
+Unconnected channels run a **demo adapter** (clearly labelled).
+
+### Live WhatsApp inbound webhook (implemented)
+
+`/api/webhooks/whatsapp` (Node runtime) implements the **official Meta WhatsApp
+Business Cloud API** shape — no unofficial automation:
+
+- **GET** — the verification handshake: echoes `hub.challenge` when
+  `hub.verify_token` matches `WHATSAPP_VERIFY_TOKEN`.
+- **POST** — verifies the `X-Hub-Signature-256` HMAC against the raw body using
+  `WHATSAPP_APP_SECRET` (timing-safe) and returns 401 on mismatch, then ingests:
+  - **Idempotent** — each provider message id is stored in `webhook_events`
+    (unique key); replays are no-ops (and `messages.external_id` is unique too).
+  - **Routing** — `metadata.phone_number_id` → `channel_connections.config`
+    resolves the org/channel/inbox.
+  - **Mapping** — finds or creates the contact (by WhatsApp id) and an open
+    conversation, inserts the inbound message, and updates the conversation.
+    Because `messages` is in the realtime publication, the inbox updates live.
+  - **Statuses** — `sent/delivered/read/failed` update the message and append a
+    `message_status_events` row.
+- Test locally without a real number: `npm run wa:sim` (and `npm run wa:sim
+  status`) maps the demo WhatsApp channel to a test `phone_number_id`, signs a
+  sample payload, and POSTs it. Email (Resend) and Meta Messenger/Instagram plug
+  in behind the same adapter shape.
 
 ---
 
@@ -334,12 +354,15 @@ contacts table · reports (real metrics + charts) · **chatbot builder**
 tracking) · **CSV contact import** (mapping, validation, dedupe, tags, consent) ·
 data-backed lists for AI agents, knowledge, integrations, settings.
 
+The **WhatsApp inbound webhook is live** (signature-verified, idempotent, maps to
+conversations); outbound WhatsApp send and the other channel adapters follow the
+same pattern.
+
 **Honest build-outs (labelled in the UI):** the live event-driven automation
-engine (rules are built, ordered, evaluated and tested now) · live message
+engine (rules are built, ordered, evaluated and tested now) · outbound message
 delivery to providers (broadcasts record recipients and simulate delivery in demo
-mode) · live channel adapters + inbound webhooks · CSV export · knowledge
-document upload & re-indexing · full settings subpages · presence/typing
-indicators.
+mode) · email/Messenger/Instagram adapters · CSV export · knowledge document
+upload & re-indexing · full settings subpages · presence/typing indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.

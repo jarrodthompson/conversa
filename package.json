@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "wa:sim": "tsx scripts/simulate-whatsapp.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -225,6 +225,30 @@ Open **Broadcasts** (Owner or Marketing).
 6. **Send a test:** enter an address and click the send icon → a demo test is
    logged.
 
+## 11b. Live WhatsApp webhook 🟢
+
+Test the official Meta Cloud API inbound webhook locally (no real number needed):
+
+1. Ensure `.env.local` has `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`,
+   `WHATSAPP_PHONE_NUMBER_ID`, and that the dev server was (re)started after
+   setting them.
+2. Verification handshake:
+   `GET /api/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=<token>&hub.challenge=42`
+   → returns `42`.
+3. Inbound message + idempotency:
+   ```bash
+   npm run wa:sim
+   ```
+   **Expect:** `{messages:1}` then a second `{duplicates:1}` (same id ignored).
+   Open **Inbox** → a **Test Customer** WhatsApp conversation appears (live, via
+   realtime).
+4. Delivery status:
+   ```bash
+   npm run wa:sim status
+   ```
+   **Expect:** a message then `{statuses:1}` (marked read).
+5. A tampered/missing signature returns **401** (verified in the unit tests).
+
 ## 12b. Integrations / Settings / Notifications
 
 - **Integrations:** all six channels shown; seeded ones display **Demo mode**.
