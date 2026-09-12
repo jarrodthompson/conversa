@@ -181,7 +181,7 @@ export default async function InboxPage({
                     <div className={cn("max-w-[75%] rounded-[12px] px-3.5 py-2.5 text-sm", outbound ? "bg-primary text-primary-foreground" : "border border-border bg-card")}>
                       {m.author_type === "ai" && (
                         <p className={cn("mb-1 flex items-center gap-1 text-[11px] font-medium", outbound ? "text-cyan-100" : "text-primary")}>
-                          <Sparkles className="size-3" /> AI agent · demo
+                          <Sparkles className="size-3" /> AI agent
                         </p>
                       )}
                       <p className="whitespace-pre-wrap">{m.body}</p>

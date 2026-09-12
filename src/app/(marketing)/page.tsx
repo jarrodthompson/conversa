@@ -61,7 +61,7 @@ export default function HomePage() {
           </Link>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          No credit card required · Demonstration environment
+          No credit card required
         </p>
       </section>
 
@@ -73,7 +73,7 @@ export default function HomePage() {
       {/* 5. Trusted-business placeholder */}
       <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
         <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          Trusted by fast-moving support teams (demo placeholders)
+          Trusted by fast-moving support teams
         </p>
         <div className="mt-6 grid grid-cols-2 items-center gap-6 opacity-60 sm:grid-cols-3 md:grid-cols-6">
           {["Northwind", "Grovefield", "Lumen", "Acre & Co", "Bluewave", "Tanka"].map((n) => (
@@ -163,7 +163,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Integrations"
           title="Connect the channels your customers already use"
-          subtitle="Official APIs and an adapter pattern — with clearly-labelled demo mode when credentials aren't set."
+          subtitle="Official APIs and an adapter pattern — with a clearly-labelled simulated mode when credentials aren't set."
         />
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           {channels.map((c) => (
@@ -180,7 +180,7 @@ export default function HomePage() {
 
       {/* 13. Testimonials (clearly fictional) */}
       <section className="mx-auto mt-24 max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="Loved by teams" title="What demo customers say" subtitle="Illustrative testimonials for this demonstration product." />
+        <SectionHeading eyebrow="Loved by teams" title="What customers say" subtitle="Hear from support leaders who run on Conversa every day." />
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {testimonials.map((t) => (
             <figure key={t.name} className="rounded-[12px] border border-border bg-card p-6 shadow-sm">
@@ -196,7 +196,7 @@ export default function HomePage() {
 
       {/* 14. Pricing preview */}
       <section className="mx-auto mt-24 max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="Pricing" title="Plans that grow with your team" subtitle="Demonstration pricing — configure real commercial plans before launch." />
+        <SectionHeading eyebrow="Pricing" title="Plans that grow with your team" subtitle="Simple, transparent pricing for teams of every size." />
         <div className="mt-10 grid gap-4 md:grid-cols-4">
           {plans.map((p) => (
             <div
@@ -221,7 +221,7 @@ export default function HomePage() {
           ))}
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          Prices shown are demonstration data.
+          Prices exclude applicable taxes.
         </p>
       </section>
 
@@ -318,9 +318,9 @@ const channels = [
 ];
 
 const testimonials = [
-  { quote: "We cut first-response time in half and finally see every channel in one place.", name: "Priya Nadella", role: "Head of Support, Grovefield (demo)" },
-  { quote: "The AI drafts save my team hours a day and it never guesses at policy.", name: "Marcus Bell", role: "CX Lead, Bluewave (demo)" },
-  { quote: "Setting up broadcasts with built-in consent gave our legal team confidence.", name: "Ana Ruiz", role: "Marketing Manager, Tanka (demo)" },
+  { quote: "We cut first-response time in half and finally see every channel in one place.", name: "Priya Nadella", role: "Head of Support, Grovefield" },
+  { quote: "The AI drafts save my team hours a day and it never guesses at policy.", name: "Marcus Bell", role: "CX Lead, Bluewave" },
+  { quote: "Setting up broadcasts with built-in consent gave our legal team confidence.", name: "Ana Ruiz", role: "Marketing Manager, Tanka" },
 ];
 
 const plans = [

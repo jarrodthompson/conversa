@@ -21,7 +21,7 @@ export default async function BillingSettingsPage() {
       <PageHeader title="Billing" description="Manage your plan and seats." />
 
       <div className="mt-4 flex items-center gap-2 rounded-[10px] border border-warning/30 bg-warning/5 px-4 py-2.5 text-sm text-warning">
-        Demonstration billing — switching a plan updates your workspace record only. No payment is taken.
+        Switching a plan updates your workspace record only. No payment is taken.
       </div>
 
       {s && (

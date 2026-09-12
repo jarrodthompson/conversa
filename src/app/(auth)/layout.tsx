@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="w-full max-w-sm">{children}</div>
         </div>
         <p className="text-center text-xs text-muted-foreground">
-          Demonstration product · Not affiliated with any other brand
+          Not affiliated with any other brand
         </p>
       </div>
 

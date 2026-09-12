@@ -8,7 +8,7 @@ export default function DemoPage() {
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Book a demo</p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-tight">See Conversa in action</h1>
       <p className="mt-4 text-lg text-muted-foreground">
-        The fastest way to explore Conversa is to start a free demo workspace — it comes
+        The fastest way to explore Conversa is to start a free trial workspace — it comes
         pre-loaded with example conversations, an AI agent, chatbots and reports.
       </p>
       <ul className="mt-8 space-y-3">
@@ -20,7 +20,7 @@ export default function DemoPage() {
         <Link href="/register"><Button size="lg">Start free</Button></Link>
         <Link href="/login"><Button size="lg" variant="outline">Sign in</Button></Link>
       </div>
-      <p className="mt-6 text-sm text-muted-foreground">A guided sales demo booking form would connect here in production.</p>
+      <p className="mt-6 text-sm text-muted-foreground">Prefer a guided walkthrough? Email <a href="mailto:hello@conversa.app" className="text-primary underline underline-offset-2">hello@conversa.app</a> and our team will schedule a session.</p>
     </div>
   );
 }

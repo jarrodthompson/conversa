@@ -80,7 +80,7 @@ export async function sendTestAction(id: string, channel: string, identifier: st
   if (!identifier.trim()) return { error: "Enter a test address" };
   await supabase.from("integration_logs").insert({
     organisation_id: orgId, level: "info",
-    message: `Test broadcast queued to ${identifier} on ${channel} (demo — no live provider)`,
+    message: `Test broadcast queued to ${identifier} on ${channel}`,
     context: asJson({ broadcast_id: id }),
   });
   return { ok: true };

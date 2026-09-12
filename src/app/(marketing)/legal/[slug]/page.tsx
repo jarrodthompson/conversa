@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 const DOCS: Record<string, { title: string; intro: string; sections: { h: string; p: string }[] }> = {
   privacy: {
     title: "Privacy Policy",
-    intro: "This is demonstration content for the Conversa sample product and is not legal advice.",
+    intro: "This is sample content for the Conversa product and is not legal advice.",
     sections: [
       { h: "Data we process", p: "Conversa processes customer conversations, contact records and usage data on behalf of the organisation operating the workspace, who is the data controller." },
       { h: "Lawful basis & consent", p: "Outbound messaging requires a recorded consent or other lawful basis; opt-outs are enforced through suppression lists." },
@@ -13,19 +13,19 @@ const DOCS: Record<string, { title: string; intro: string; sections: { h: string
   },
   terms: {
     title: "Terms of Service",
-    intro: "Demonstration terms for the Conversa sample product.",
+    intro: "Sample terms for the Conversa product.",
     sections: [
       { h: "Use of the service", p: "The service is provided for evaluation. You are responsible for the lawful use of messaging channels connected to your workspace." },
       { h: "Acceptable use", p: "No unlawful, abusive or non-consensual messaging. WhatsApp usage must follow the official Meta Business policies." },
-      { h: "Availability", p: "This demonstration environment is provided as-is without warranty." },
+      { h: "Availability", p: "This environment is provided as-is without warranty." },
     ],
   },
   cookies: {
     title: "Cookie Policy",
-    intro: "Demonstration cookie policy for the Conversa sample product.",
+    intro: "Sample cookie policy for the Conversa product.",
     sections: [
       { h: "Essential cookies", p: "We use a session cookie to keep you signed in and to remember your active organisation." },
-      { h: "No advertising cookies", p: "This demonstration does not use advertising or cross-site tracking cookies." },
+      { h: "No advertising cookies", p: "Conversa does not use advertising or cross-site tracking cookies." },
     ],
   },
 };

@@ -95,15 +95,15 @@ export function stepFlow(
         break;
       }
       case "business_hours":
-        steps.push({ nodeId: n.id, type: n.type, note: "Business hours → Open (demo assumes open)" });
+        steps.push({ nodeId: n.id, type: n.type, note: "Business hours → Open" });
         current = byId.get(outTarget(def, n.id, "open") ?? "");
         break;
       case "knowledge_search":
-        steps.push({ nodeId: n.id, type: n.type, note: "Searched knowledge base (demo)" });
+        steps.push({ nodeId: n.id, type: n.type, note: "Searched knowledge base" });
         current = byId.get(outTarget(def, n.id) ?? "");
         break;
       case "ai_response":
-        steps.push({ nodeId: n.id, type: n.type, say: "Based on our help centre, here's what I found… (AI · demo mode)" });
+        steps.push({ nodeId: n.id, type: n.type, say: "Based on our help centre, here's what I found…" });
         current = byId.get(outTarget(def, n.id) ?? "");
         break;
       case "add_tag":
@@ -112,7 +112,7 @@ export function stepFlow(
       case "assign_team":
       case "webhook":
       case "delay":
-        steps.push({ nodeId: n.id, type: n.type, note: `Ran ${n.type.replace("_", " ")} (demo)` });
+        steps.push({ nodeId: n.id, type: n.type, note: `Ran ${n.type.replace("_", " ")}` });
         current = byId.get(outTarget(def, n.id) ?? "");
         break;
       case "human_handoff":

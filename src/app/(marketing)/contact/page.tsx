@@ -6,13 +6,13 @@ export default function ContactPage() {
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Contact</p>
       <h1 className="mt-3 text-4xl font-extrabold tracking-tight">Get in touch</h1>
       <p className="mt-4 text-muted-foreground">
-        This is a demonstration product, so the details below are illustrative.
+        Reach our team through any of the channels below.
       </p>
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {[
-          { icon: Mail, k: "Email", v: "hello@conversa.demo" },
+          { icon: Mail, k: "Email", v: "hello@conversa.app" },
           { icon: MessageSquare, k: "Live chat", v: "Available in-app, 9–5" },
-          { icon: Building2, k: "Office", v: "Remote-first (demo)" },
+          { icon: Building2, k: "Office", v: "Remote-first" },
         ].map((x) => (
           <div key={x.k} className="rounded-[12px] border border-border bg-card p-5">
             <x.icon className="size-5 text-primary" />

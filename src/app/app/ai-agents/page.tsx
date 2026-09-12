@@ -32,7 +32,7 @@ export default async function AiAgentsPage() {
 
       <div className="mt-4 flex items-center gap-2 rounded-[10px] border border-border bg-secondary/50 px-4 py-2.5 text-sm text-secondary-foreground">
         <Sparkles className="size-4 text-primary" />
-        Running in <strong>demo mode</strong> — responses are deterministic and clearly labelled. Add an API key in <code className="rounded bg-card px-1">.env.local</code> to enable a live provider.
+        Running with <strong>built-in responses</strong> — deterministic and clearly labelled. Add an API key in <code className="rounded bg-card px-1">.env.local</code> to enable a live provider.
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

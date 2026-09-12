@@ -19,7 +19,7 @@ export function BillingManager({ plans, currentPlanId, canManage }: { plans: Pla
     start(async () => {
       const res = await changePlanAction(id);
       if (res?.error) toast.error(res.error);
-      else { toast.success("Plan updated (demo)"); router.refresh(); }
+      else { toast.success("Plan updated"); router.refresh(); }
     });
   }
 

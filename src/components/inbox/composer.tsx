@@ -44,9 +44,9 @@ export function Composer({ conversationId }: { conversationId: string }) {
   function aiSuggest() {
     setMode("reply");
     setValue(
-      "Thanks for getting in touch — I'd be happy to help with this. I've checked your account and can confirm the next steps below. (AI-suggested draft · demo mode — please review before sending.)",
+      "Thanks for getting in touch — I'd be happy to help with this. I've checked your account and can confirm the next steps below. (AI-suggested draft — please review before sending.)",
     );
-    toast.info("AI draft inserted (demo mode) — review before sending");
+    toast.info("AI draft inserted — review before sending");
   }
 
   return (
@@ -95,9 +95,9 @@ export function Composer({ conversationId }: { conversationId: string }) {
           className="w-full resize-none bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground"
         />
         <div className="flex items-center gap-1 border-t border-border/60 px-2 py-1.5">
-          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Attach (demo)"><Paperclip className="size-4" /></button>
-          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Emoji (demo)"><Smile className="size-4" /></button>
-          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Schedule send (demo)"><Clock className="size-4" /></button>
+          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Attach"><Paperclip className="size-4" /></button>
+          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Emoji"><Smile className="size-4" /></button>
+          <button className="rounded-md p-1.5 text-muted-foreground hover:bg-muted" title="Schedule send"><Clock className="size-4" /></button>
           <div className="ml-auto flex items-center gap-2">
             {mode === "reply" && (
               <Button variant="outline" size="sm" onClick={() => submit(true)} disabled={pending}>

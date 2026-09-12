@@ -20,7 +20,7 @@ export default function AboutPage() {
         ))}
       </div>
       <p className="mt-10 text-sm text-muted-foreground">
-        Conversa is an original demonstration product and is not affiliated with any other brand.
+        Conversa is an original product and is not affiliated with any other brand.
       </p>
     </div>
   );

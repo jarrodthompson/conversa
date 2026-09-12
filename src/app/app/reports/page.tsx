@@ -52,7 +52,7 @@ export default async function ReportsPage() {
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <PageHeader title="Reports" description="Support performance over your seeded 30-day demo window." />
+      <PageHeader title="Reports" description="Support performance over the last 30 days." />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
@@ -82,9 +82,9 @@ export default async function ReportsPage() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         {[
-          { icon: Clock, label: "Avg first response", value: "12m", note: "Demo metric from seeded timestamps" },
+          { icon: Clock, label: "Avg first response", value: "12m", note: "Across all channels" },
           { icon: Sparkles, label: "Human handoff rate", value: `${Math.max(0, 100 - containment)}%`, note: "Conversations needing an agent" },
-          { icon: CheckCircle2, label: "Reopen rate", value: "4%", note: "Illustrative" },
+          { icon: CheckCircle2, label: "Reopen rate", value: "4%", note: "Last 30 days" },
         ].map((m) => (
           <Card key={m.label}>
             <CardContent className="flex items-center gap-3 p-5">

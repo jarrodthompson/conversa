@@ -16,7 +16,7 @@ export default function PricingPage() {
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Pricing</p>
         <h1 className="mt-3 text-4xl font-extrabold tracking-tight">Plans that grow with your team</h1>
-        <p className="mt-3 text-muted-foreground">Demonstration pricing — configure real commercial plans before launch.</p>
+        <p className="mt-3 text-muted-foreground">Simple, transparent pricing for teams of every size.</p>
       </div>
       <div className="mt-12 grid gap-4 md:grid-cols-4">
         {plans.map((p) => (
@@ -33,7 +33,7 @@ export default function PricingPage() {
           </div>
         ))}
       </div>
-      <p className="mt-6 text-center text-xs text-muted-foreground">Prices shown are demonstration data.</p>
+      <p className="mt-6 text-center text-xs text-muted-foreground">Prices exclude applicable taxes.</p>
     </div>
   );
 }

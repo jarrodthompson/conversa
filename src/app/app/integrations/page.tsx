@@ -26,7 +26,7 @@ export default async function IntegrationsPage() {
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <PageHeader title="Integrations" description="Connect channels via official APIs. Unconnected channels use a clearly-labelled demo adapter." />
+      <PageHeader title="Integrations" description="Connect channels via official APIs. Unconnected channels use a clearly-labelled simulated adapter." />
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {ALL_TYPES.map((type) => {
           const meta = CHANNEL_META[type];
@@ -42,7 +42,7 @@ export default async function IntegrationsPage() {
                   {connected ? (
                     <Badge variant="success">Connected</Badge>
                   ) : demo ? (
-                    <Badge variant="warning">Demo mode</Badge>
+                    <Badge variant="warning">Simulated</Badge>
                   ) : (
                     <Badge variant="muted">Not connected</Badge>
                   )}
