@@ -63,6 +63,8 @@ Open <http://localhost:3000>.
   model, channels).
 - **[docs/TESTING-GUIDE.md](docs/TESTING-GUIDE.md)** — a click-by-click guide to
   test every feature, including the realtime demo.
+- **[docs/DEPLOY.md](docs/DEPLOY.md)** — deploy to Vercel (env vars, Supabase
+  redirect URLs, and the automation cron).
 
 ## Demo login
 
