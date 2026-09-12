@@ -285,8 +285,14 @@ Test the official Meta Cloud API inbound webhook locally (no real number needed)
 
 - **Integrations:** all six channels shown; seeded ones display **Demo mode**.
   Live connection forms are the adapter build-out.
-- **Settings:** organisation details + the team & roles list (6 members).
-  **My Profile** shows your account + role.
+- **Settings:** a full area with a sub-nav (owner/admin can manage; others view):
+  - **General** — organisation details. **My Profile** — your account + role.
+  - **Team & Roles** — change a member's role or remove them (not yourself).
+  - **Inboxes** — add/delete inboxes, set the default.
+  - **Tags** — create (with colour) / delete tags.
+  - **SLA Policies** — create/edit/delete first-response & resolution targets.
+  - **Business Hours** — per-day open/close + timezone.
+  - **Billing** — switch between demo plans (no payment taken).
 - **Notifications:** empty-state until mentions/assignments/SLA events are wired.
 
 ---

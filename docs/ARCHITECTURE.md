@@ -397,11 +397,16 @@ fallback when unconfigured). Messenger/Instagram follow the same pattern.
 
 Automation rules **fire live** on inbound messages (loop-protected engine).
 
+Full **Settings** area is live — General, Profile, **Team & Roles** (role change /
+remove), **Inboxes**, **Tags**, **SLA Policies**, **Business Hours**, and
+(demo) **Billing** — under `/app/settings/*` with a sub-nav layout; all mutations
+are gated by the `settings.manage` capability and RLS.
+
 **Honest build-outs (labelled in the UI):** broadcast delivery to providers
 (recipients recorded, delivery simulated in demo mode) · Messenger/Instagram
 adapters · time-based automation triggers (waiting-too-long / SLA sweeps need a
-scheduler) · CSV export · knowledge document upload & re-indexing · full settings
-subpages · presence/typing indicators.
+scheduler) · CSV export · knowledge document upload & re-indexing · team
+invitations (email flow) · presence/typing indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.
