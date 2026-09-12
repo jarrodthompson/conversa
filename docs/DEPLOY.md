@@ -46,18 +46,18 @@ Without this, email confirmation and password-reset links won't complete in prod
 
 ## 4. Cron — time-based automation sweep
 
-`vercel.json` schedules the sweep every 15 minutes:
+`vercel.json` schedules the sweep once a day (Hobby-compatible):
 
 ```json
-{ "crons": [{ "path": "/api/cron/sweep", "schedule": "*/15 * * * *" }] }
+{ "crons": [{ "path": "/api/cron/sweep", "schedule": "0 9 * * *" }] }
 ```
 
 - When a `CRON_SECRET` env var exists, **Vercel automatically sends
   `Authorization: Bearer <CRON_SECRET>`** with each cron invocation, which the
   endpoint verifies — so no extra wiring is needed.
-- **Plan note:** Vercel **Hobby** runs crons at most **once per day**; change the
-  schedule to e.g. `0 * * * *` (hourly) or `0 9 * * *` (daily) if the 15-minute
-  cadence is rejected. **Pro** supports the 15-minute schedule.
+- **Plan note:** Vercel **Hobby** allows **one cron run per day** (hence the daily
+  schedule). On **Pro**, change it to e.g. `*/15 * * * *` for a 15-minute cadence
+  and redeploy. You can also trigger it manually any time (below).
 - You can trigger it manually any time:
   `curl -H "Authorization: Bearer <CRON_SECRET>" https://<domain>/api/cron/sweep`
 
