@@ -30,12 +30,38 @@ interface RuleRow {
   run_count: number;
 }
 
+const TIME_BASED = new Set(["conversation.waiting", "conversation.idle", "sla.at_risk"]);
+
 async function conversationRecord(db: DB, orgId: string, conversationId: string, body?: string) {
   const { data } = await db
     .from("conversations")
-    .select("channel_type, priority, status, sentiment, is_ai_handled, subject, last_message_preview")
+    .select("channel_type, priority, status, sentiment, is_ai_handled, subject, last_message_preview, last_message_at, sla_due_at, sla_breached")
     .eq("organisation_id", orgId).eq("id", conversationId).maybeSingle();
   return { ...(data ?? {}), body: body ?? "" } as Record<string, unknown>;
+}
+
+function minutesSince(ts: unknown): number {
+  if (!ts) return Infinity;
+  return (Date.now() - Date.parse(String(ts))) / 60000;
+}
+
+/** Timing gate for time-based triggers (returns true when the rule should fire). */
+function passesTiming(event: string, config: Record<string, unknown> | null, rec: Record<string, unknown>): boolean {
+  if (event === "conversation.waiting") {
+    const minutes = Number(config?.minutes ?? 30);
+    return minutesSince(rec.last_message_at) >= minutes;
+  }
+  if (event === "conversation.idle") {
+    const hours = Number(config?.hours ?? 48);
+    return minutesSince(rec.last_message_at) >= hours * 60;
+  }
+  if (event === "sla.at_risk") {
+    if (!rec.sla_due_at || rec.sla_breached) return false;
+    const minsToDue = -minutesSince(rec.sla_due_at); // positive = still in the future
+    const threshold = Number(config?.minutes ?? 30);
+    return minsToDue > 0 && minsToDue <= threshold;
+  }
+  return true;
 }
 
 async function resolveTeamId(db: DB, orgId: string, name: string) {
@@ -194,6 +220,17 @@ export async function runAutomations(
     if (!evalResult.matched) {
       result.skipped++;
       continue;
+    }
+
+    // Time-based triggers: enforce the rule's timing, and fire at most once per
+    // conversation (dedupe against prior runs) so repeated sweeps don't spam.
+    // Checked after conditions so non-matching candidates skip the extra query.
+    if (TIME_BASED.has(ev.event)) {
+      if (!passesTiming(ev.event, rule.trigger_config, record)) continue;
+      const { count } = await db.from("automation_runs")
+        .select("id", { count: "exact", head: true })
+        .eq("rule_id", rule.id).eq("conversation_id", ev.conversationId);
+      if ((count ?? 0) > 0) continue;
     }
 
     firedRuleIds.add(rule.id);

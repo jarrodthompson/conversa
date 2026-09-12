@@ -213,8 +213,23 @@ npm run wa:sim "Please process a refund for order 5501"
 tagged **Billing** (open it in the Inbox to see), and an entry appears under the
 rule's **Recent runs**. The engine fires rules in order with loop protection
 (each rule fires once per cascade; follow-on events recurse only to a max depth).
-Time-based triggers (waiting-too-long / SLA) need a scheduler and remain a
-build-out.
+### Time-based rules (scheduled sweep)
+
+Triggers that need a clock — `conversation.waiting`, `conversation.idle`,
+`sla.at_risk` — run via the sweep, which also marks overdue conversations
+`sla_breached`:
+
+```bash
+npm run sweep                                              # run once locally
+# or hit the endpoint a scheduler would call:
+curl "http://localhost:3000/api/cron/sweep?secret=$CRON_SECRET"
+```
+
+**Expect:** a JSON summary `{orgs, slaBreached, fired, candidates}`. Create an
+active rule with a `conversation.waiting` trigger (e.g. 30 min) to see it act on
+idle conversations; the sweep fires each rule **once per conversation** and a
+wrong/missing `CRON_SECRET` returns **401**. Wire the endpoint to a scheduler
+(Vercel Cron / Supabase / GitHub Actions) in production.
 
 ## 11. Broadcasts (composer) 📣
 

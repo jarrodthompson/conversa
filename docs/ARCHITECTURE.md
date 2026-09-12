@@ -211,6 +211,14 @@ server.
     guarantee termination even with cyclic rules. It runs under the service-role
     client from trusted webhook code, and tolerates both the editor action shape
     (`{value}`) and legacy `{team}`/`{tag}` shapes.
+- **Time-based sweep** (`lib/automations/sweep.ts`): `runTimeSweep` handles the
+  triggers that need a clock — `conversation.waiting`, `conversation.idle` and
+  `sla.at_risk` — and marks overdue conversations `sla_breached`. It selects
+  candidate conversations and drives the same engine, which enforces each rule's
+  exact timing (`trigger_config.minutes`/`hours`) and fires **once per
+  conversation** (dedupe against `automation_runs`). Run it on a schedule via
+  `POST /api/cron/sweep` (guarded by `CRON_SECRET`) — point Vercel Cron / Supabase
+  scheduler / GitHub Actions at it — or `npm run sweep` locally.
 
 ## 7c. Broadcast composer
 
@@ -402,11 +410,12 @@ remove), **Inboxes**, **Tags**, **SLA Policies**, **Business Hours**, and
 (demo) **Billing** — under `/app/settings/*` with a sub-nav layout; all mutations
 are gated by the `settings.manage` capability and RLS.
 
-**Honest build-outs (labelled in the UI):** broadcast delivery to providers
-(recipients recorded, delivery simulated in demo mode) · Messenger/Instagram
-adapters · time-based automation triggers (waiting-too-long / SLA sweeps need a
-scheduler) · CSV export · knowledge document upload & re-indexing · team
-invitations (email flow) · presence/typing indicators.
+Automations fire both **event-driven** (on inbound messages) and **time-based**
+(via the scheduled sweep). **Honest build-outs (labelled in the UI):** broadcast
+delivery to providers (recipients recorded, delivery simulated in demo mode) ·
+Messenger/Instagram adapters · CSV export · knowledge document upload &
+re-indexing · team invitations (email flow) · presence/typing indicators. The
+sweep endpoint needs an external scheduler wired up in your host.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.
