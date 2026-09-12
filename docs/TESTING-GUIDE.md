@@ -248,6 +248,11 @@ Test the official Meta Cloud API inbound webhook locally (no real number needed)
    ```
    **Expect:** a message then `{statuses:1}` (marked read).
 5. A tampered/missing signature returns **401** (verified in the unit tests).
+6. **Outbound send:** open the WhatsApp conversation in the **Inbox** and send a
+   reply. **Expect:** the message posts and is stored with a provider id
+   (`external_id`). Without `WHATSAPP_ACCESS_TOKEN` it's a labelled demo send
+   (`metadata.demo = true`); with a real token it dispatches via the Graph API
+   and later delivery webhooks update its status.
 
 ## 12b. Integrations / Settings / Notifications
 

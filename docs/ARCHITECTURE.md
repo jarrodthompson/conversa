@@ -296,8 +296,23 @@ Business Cloud API** shape — no unofficial automation:
     `message_status_events` row.
 - Test locally without a real number: `npm run wa:sim` (and `npm run wa:sim
   status`) maps the demo WhatsApp channel to a test `phone_number_id`, signs a
-  sample payload, and POSTs it. Email (Resend) and Meta Messenger/Instagram plug
-  in behind the same adapter shape.
+  sample payload, and POSTs it.
+
+### Outbound WhatsApp send (implemented)
+
+`lib/channels/whatsapp/send.ts` sends a text via the Graph API
+(`POST /{phone_number_id}/messages` with a Bearer token). The inbox reply action
+(`sendReplyAction`) detects a WhatsApp conversation, resolves the recipient and
+`phone_number_id`, and dispatches:
+
+- With `WHATSAPP_ACCESS_TOKEN` set → a real send; the returned `wamid` is stored
+  as the message `external_id` and later delivery webhooks update its status.
+- Without a token → a **clearly-labelled demo send** (`metadata.demo = true`,
+  a `wamid.DEMO_…` id) — nothing leaves the app.
+- On failure the message is still saved (marked `failed`, error logged to
+  `integration_logs`) and the agent gets a warning toast.
+
+Email (Resend) and Meta Messenger/Instagram plug in behind the same adapter shape.
 
 ---
 
@@ -354,15 +369,15 @@ contacts table · reports (real metrics + charts) · **chatbot builder**
 tracking) · **CSV contact import** (mapping, validation, dedupe, tags, consent) ·
 data-backed lists for AI agents, knowledge, integrations, settings.
 
-The **WhatsApp inbound webhook is live** (signature-verified, idempotent, maps to
-conversations); outbound WhatsApp send and the other channel adapters follow the
-same pattern.
+**WhatsApp is live both ways** — the inbound webhook (signature-verified,
+idempotent) and outbound send (agent replies dispatch via the Cloud API, demo
+fallback when no token). Other channel adapters follow the same pattern.
 
 **Honest build-outs (labelled in the UI):** the live event-driven automation
-engine (rules are built, ordered, evaluated and tested now) · outbound message
-delivery to providers (broadcasts record recipients and simulate delivery in demo
-mode) · email/Messenger/Instagram adapters · CSV export · knowledge document
-upload & re-indexing · full settings subpages · presence/typing indicators.
+engine (rules are built, ordered, evaluated and tested now) · broadcast delivery
+to providers (recipients recorded, delivery simulated in demo mode) ·
+email/Messenger/Instagram adapters · CSV export · knowledge document upload &
+re-indexing · full settings subpages · presence/typing indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.
