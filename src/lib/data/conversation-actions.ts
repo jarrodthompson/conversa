@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAppContext } from "@/lib/auth/context";
 import { sendWhatsAppText } from "@/lib/channels/whatsapp/send";
+import { sendEmail } from "@/lib/channels/email/send";
 import type { Json } from "@/lib/supabase/types";
 
 const asJson = (v: unknown): Json => v as Json;
@@ -44,7 +45,7 @@ export async function sendReplyAction(conversationId: string, body: string) {
 
   const { data: conv } = await supabase
     .from("conversations")
-    .select("channel_type, channel_id, contact:contacts(whatsapp_number, phone)")
+    .select("channel_type, channel_id, subject, contact:contacts(whatsapp_number, phone, email)")
     .eq("id", conversationId)
     .eq("organisation_id", orgId)
     .maybeSingle();
@@ -88,6 +89,39 @@ export async function sendReplyAction(conversationId: string, body: string) {
         await supabase.from("integration_logs").insert({
           organisation_id: orgId, level: "error",
           message: `WhatsApp send failed for conversation ${conversationId}`,
+          context: asJson(metadata),
+        });
+      }
+    }
+  } else if (c?.channel_type === "email") {
+    const contact = firstOf<{ email: string | null }>(c.contact);
+    const to = contact?.email ?? "";
+    const { data: cc } = await supabase
+      .from("channel_connections")
+      .select("config")
+      .eq("channel_id", c.channel_id)
+      .maybeSingle();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cfg = (cc as any)?.config ?? {};
+    const from = cfg.from_address ?? process.env.EMAIL_FROM;
+    const subject = c.subject ? `Re: ${c.subject}` : "Re: your enquiry";
+
+    if (!to) {
+      deliveryStatus = "failed";
+      metadata = { channel: "email", error: "No email address on contact" };
+      deliveryError = "Contact has no email address";
+    } else {
+      try {
+        const res = await sendEmail({ apiKey: process.env.RESEND_API_KEY, from, to, subject, text: trimmed, replyTo: cfg.inbound_address });
+        externalId = res.externalId;
+        metadata = { channel: "email", demo: res.demo };
+      } catch (err) {
+        deliveryStatus = "failed";
+        metadata = { channel: "email", error: err instanceof Error ? err.message : String(err) };
+        deliveryError = "Email delivery failed";
+        await supabase.from("integration_logs").insert({
+          organisation_id: orgId, level: "error",
+          message: `Email send failed for conversation ${conversationId}`,
           context: asJson(metadata),
         });
       }

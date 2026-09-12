@@ -254,6 +254,21 @@ Test the official Meta Cloud API inbound webhook locally (no real number needed)
    (`metadata.demo = true`); with a real token it dispatches via the Graph API
    and later delivery webhooks update its status.
 
+## 11c. Live email adapter (Resend) 📧
+
+1. Ensure `.env.local` has `RESEND_WEBHOOK_SECRET` (and optionally `RESEND_API_KEY`
+   + `EMAIL_FROM`); restart the dev server after changes.
+2. Inbound + idempotency:
+   ```bash
+   npm run email:sim
+   ```
+   **Expect:** `{inbound:1}` then `{duplicates:1}`. Open **Inbox** → a new email
+   conversation from **new.lead@example.com** ("Question about bulk orders").
+3. Outbound: open that email conversation and send a reply. **Expect:** it's
+   stored with an `external_id` (`email_DEMO_…` in demo mode; a real Resend id
+   with `RESEND_API_KEY` set, after which delivery events update its status).
+4. A bad Svix signature returns **401** (verified in the unit tests).
+
 ## 12b. Integrations / Settings / Notifications
 
 - **Integrations:** all six channels shown; seeded ones display **Demo mode**.

@@ -312,7 +312,21 @@ Business Cloud API** shape — no unofficial automation:
 - On failure the message is still saved (marked `failed`, error logged to
   `integration_logs`) and the agent gets a warning toast.
 
-Email (Resend) and Meta Messenger/Instagram plug in behind the same adapter shape.
+Meta Messenger/Instagram plug in behind the same adapter shape.
+
+### Email adapter — Resend (implemented, both ways)
+
+- **Outbound** (`lib/channels/email/send.ts`): `sendEmail` posts to the Resend API
+  with `RESEND_API_KEY`; `sendReplyAction` uses it for email conversations
+  (from-address from the channel config or `EMAIL_FROM`, `Re:` subject, reply-to
+  set to the inbound address). No key → labelled demo send.
+- **Inbound + delivery events** (`/api/webhooks/email`): verifies the Resend
+  **Svix** signature (`svix-id`/`svix-timestamp`/`svix-signature` HMAC against
+  `RESEND_WEBHOOK_SECRET`), idempotent per svix event id. Inbound emails map to a
+  contact (by from-address) and an email conversation (routed by the recipient
+  `inbound_address` on the channel connection); delivery events
+  (`delivered`/`opened`/`bounced`…) update the message and append a status event.
+- Test locally: `npm run email:sim` signs and POSTs a sample inbound email.
 
 ---
 
@@ -369,14 +383,14 @@ contacts table · reports (real metrics + charts) · **chatbot builder**
 tracking) · **CSV contact import** (mapping, validation, dedupe, tags, consent) ·
 data-backed lists for AI agents, knowledge, integrations, settings.
 
-**WhatsApp is live both ways** — the inbound webhook (signature-verified,
-idempotent) and outbound send (agent replies dispatch via the Cloud API, demo
-fallback when no token). Other channel adapters follow the same pattern.
+**WhatsApp and Email are live both ways** — signature-verified idempotent inbound
+webhooks and outbound send (agent replies dispatch via the provider, demo
+fallback when unconfigured). Messenger/Instagram follow the same pattern.
 
 **Honest build-outs (labelled in the UI):** the live event-driven automation
 engine (rules are built, ordered, evaluated and tested now) · broadcast delivery
 to providers (recipients recorded, delivery simulated in demo mode) ·
-email/Messenger/Instagram adapters · CSV export · knowledge document upload &
+Messenger/Instagram adapters · CSV export · knowledge document upload &
 re-indexing · full settings subpages · presence/typing indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
