@@ -30,6 +30,11 @@ async function main() {
       applied_at timestamptz not null default now()
     );
   `);
+  // This bookkeeping table lives in the API-exposed `public` schema; enable RLS
+  // (no policies) so it isn't readable via PostgREST. The migration runner
+  // connects as the DB owner and bypasses RLS, so this does not affect it.
+  await client.query("alter table public._migrations enable row level security");
+  await client.query("revoke all on public._migrations from anon, authenticated");
 
   const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
   for (const file of files) {
