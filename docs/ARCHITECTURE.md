@@ -197,12 +197,20 @@ server.
 - **Editor** (`/app/automations/[id]`): a **When → If → Then** form — pick a
   trigger (+inline config), add AND-ed conditions (field/operator/value), and add
   actions (each with its own parameter). Saved via a server action.
-- **Test** (`lib/automations/evaluate.ts` + `testRuleAction`): evaluates the
-  rule's conditions against your most recent conversation, records an
-  `automation_runs` row (success/skipped), and shows which actions *would* run.
-- The live event-driven engine (firing rules automatically on events, with the
-  `automation_runs.depth` loop-protection column) is a labelled build-out;
-  ordering, storage, evaluation and history are in place.
+- **Test** (`lib/automations/evaluate.ts` + `testRuleAction`): dry-runs the
+  rule's conditions against your most recent conversation.
+- **Live engine** (`lib/automations/engine.ts`): `runAutomations` is called from
+  the channel webhooks on `message.inbound`. It loads active rules for the org in
+  `position` order, applies the keyword filter + condition evaluation, and
+  executes actions (assign team/user, add tag, set priority, escalate, resolve,
+  snooze, notify managers, saved reply, start chatbot, call webhook,
+  round-robin). Each fired rule writes an `automation_runs` row.
+  - **Loop protection:** a rule fires at most once per cascade (a shared
+    `firedRuleIds` set) and follow-on events (`tag.added`, `priority.changed`,
+    `conversation.resolved`) recurse only up to `MAX_DEPTH` — together these
+    guarantee termination even with cyclic rules. It runs under the service-role
+    client from trusted webhook code, and tolerates both the editor action shape
+    (`{value}`) and legacy `{team}`/`{tag}` shapes.
 
 ## 7c. Broadcast composer
 
@@ -387,11 +395,13 @@ data-backed lists for AI agents, knowledge, integrations, settings.
 webhooks and outbound send (agent replies dispatch via the provider, demo
 fallback when unconfigured). Messenger/Instagram follow the same pattern.
 
-**Honest build-outs (labelled in the UI):** the live event-driven automation
-engine (rules are built, ordered, evaluated and tested now) · broadcast delivery
-to providers (recipients recorded, delivery simulated in demo mode) ·
-Messenger/Instagram adapters · CSV export · knowledge document upload &
-re-indexing · full settings subpages · presence/typing indicators.
+Automation rules **fire live** on inbound messages (loop-protected engine).
+
+**Honest build-outs (labelled in the UI):** broadcast delivery to providers
+(recipients recorded, delivery simulated in demo mode) · Messenger/Instagram
+adapters · time-based automation triggers (waiting-too-long / SLA sweeps need a
+scheduler) · CSV export · knowledge document upload & re-indexing · full settings
+subpages · presence/typing indicators.
 
 Having security building blocks (RLS, audit logs, consent/suppression tables)
 does **not** by itself make the software compliant or certified.

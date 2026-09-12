@@ -46,6 +46,8 @@ async function post(payload: unknown) {
 
 const messageId = `wamid.TEST${Date.now()}`;
 
+const customBody = process.argv[2] && process.argv[2] !== "status" ? process.argv[2] : null;
+
 function textPayload() {
   return {
     object: "whatsapp_business_account",
@@ -59,7 +61,7 @@ function textPayload() {
           contacts: [{ profile: { name: "Test Customer" }, wa_id: waId }],
           messages: [{
             from: waId, id: messageId, timestamp: String(Math.floor(Date.now() / 1000)),
-            type: "text", text: { body: "Hi! This came in via the WhatsApp Cloud API webhook." },
+            type: "text", text: { body: customBody ?? "Hi! This came in via the WhatsApp Cloud API webhook." },
           }],
         },
       }],

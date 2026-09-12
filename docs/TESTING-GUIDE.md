@@ -201,8 +201,20 @@ Open **Automations** (sign in as Owner or Manager).
 6. **New rule:** back on the list, **New rule** creates a blank disabled rule and
    opens its editor.
 
-> The live engine that fires rules automatically on real events is a labelled
-> build-out; building, ordering, evaluating and testing rules all work now.
+### Rules fire live on inbound messages
+
+The seeded rule *"Route billing keywords to Billing team"* runs automatically:
+
+```bash
+npm run wa:sim "Please process a refund for order 5501"
+```
+
+**Expect:** the WhatsApp conversation is auto-assigned to the **Billing** team and
+tagged **Billing** (open it in the Inbox to see), and an entry appears under the
+rule's **Recent runs**. The engine fires rules in order with loop protection
+(each rule fires once per cascade; follow-on events recurse only to a max depth).
+Time-based triggers (waiting-too-long / SLA) need a scheduler and remain a
+build-out.
 
 ## 11. Broadcasts (composer) 📣
 

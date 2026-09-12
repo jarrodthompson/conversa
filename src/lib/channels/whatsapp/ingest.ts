@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   WhatsAppWebhookPayload, WhatsAppValue, WhatsAppMessage, WhatsAppStatus,
 } from "@/lib/channels/whatsapp/types";
+import { runAutomations } from "@/lib/automations/engine";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DB = SupabaseClient<any>;
@@ -123,6 +124,13 @@ async function handleMessage(db: DB, value: WhatsAppValue, m: WhatsAppMessage): 
   await db.from("conversations").update({
     last_message_at: ts, last_message_preview: body.slice(0, 80),
   }).eq("id", conversationId);
+
+  // Fire automation rules for the inbound message (loop-protected engine).
+  try {
+    await runAutomations(db, { orgId: channel.orgId, conversationId, event: "message.inbound", body });
+  } catch (err) {
+    await db.from("integration_logs").insert({ organisation_id: channel.orgId, level: "error", message: "Automation engine error (whatsapp inbound)", context: { error: err instanceof Error ? err.message : String(err) } });
+  }
 
   await db.from("webhook_events").update({ status: "processed", processed_at: new Date().toISOString() }).eq("idempotency_key", `wa_msg_${m.id}`);
   return "ok";

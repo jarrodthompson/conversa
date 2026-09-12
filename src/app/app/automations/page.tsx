@@ -39,9 +39,10 @@ export default async function AutomationsPage() {
       </div>
 
       <p className="mt-4 max-w-4xl text-xs text-muted-foreground">
-        Drag to reorder. Rules run in order with loop protection. The live
-        event-driven engine is a separate build-out; use <strong>Test</strong> on a
-        rule to evaluate its conditions against your most recent conversation.
+        Drag to reorder. Rules run in <strong>position order</strong> with loop
+        protection. <code className="rounded bg-muted px-1">message.inbound</code>{" "}
+        rules now fire automatically on incoming WhatsApp & email messages; use{" "}
+        <strong>Test</strong> to dry-run a rule against your most recent conversation.
       </p>
     </div>
   );
