@@ -397,7 +397,13 @@ contacts table · reports (real metrics + charts) · **chatbot builder**
 (triggers/conditions/actions, reorder, test, run history) · **broadcast composer**
 (consent-enforced audience, personalisation, approval, scheduling, delivery
 tracking) · **CSV contact import** (mapping, validation, dedupe, tags, consent) ·
-data-backed lists for AI agents, knowledge, integrations, settings.
+data-backed lists for AI agents, knowledge, integrations, settings · a full
+public marketing site (home, feature pages, pricing, about, contact, demo, legal).
+
+**Polish:** the inbox collapses to navigable single-panel view on mobile (list →
+conversation with a Back button); route-level loading skeletons, an app error
+boundary and a branded 404; the production build (`npm run build`) compiles all
+routes; typecheck, lint and the 75-test suite pass.
 
 **WhatsApp and Email are live both ways** — signature-verified idempotent inbound
 webhooks and outbound send (agent replies dispatch via the provider, demo

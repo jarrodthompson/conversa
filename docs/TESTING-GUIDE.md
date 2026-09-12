@@ -326,6 +326,7 @@ Test the official Meta Cloud API inbound webhook locally (no real number needed)
 ```bash
 npm run typecheck        # expect: no errors
 npm run lint             # expect: no errors
+npm run build            # expect: production build succeeds (all routes compile)
 npm run test:unit        # Vitest unit tests (no DB) — expect all pass
 npm run test:integration # Vitest RLS/tenant-isolation + ticket transitions (needs .env.local)
 npm test                 # unit + integration together

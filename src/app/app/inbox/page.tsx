@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
   Inbox as InboxIcon, AtSign, Clock, Moon, CheckCircle2, Ban, Sparkles,
-  Users, AlertTriangle, MessageSquareText,
+  Users, AlertTriangle, MessageSquareText, ArrowLeft,
 } from "lucide-react";
 import { getAppContext } from "@/lib/auth/context";
 import {
@@ -45,6 +45,8 @@ export default async function InboxPage({
 
   const selectedId = sp.c ?? rows[0]?.id;
   const detail = selectedId ? await getConversation(org.id, selectedId) : null;
+  // On mobile we show the list until a conversation is explicitly opened (?c=).
+  const hasSelection = Boolean(sp.c);
 
   return (
     <div className="grid h-full grid-cols-1 md:grid-cols-[210px_320px_1fr] xl:grid-cols-[210px_340px_1fr_300px]">
@@ -77,8 +79,8 @@ export default async function InboxPage({
         </nav>
       </aside>
 
-      {/* Column 2 — conversation list */}
-      <section className="flex min-h-0 flex-col border-r border-border bg-card">
+      {/* Column 2 — conversation list (hidden on mobile once a conversation is open) */}
+      <section className={cn("min-h-0 flex-col border-r border-border bg-card", hasSelection ? "hidden md:flex" : "flex")}>
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="text-sm font-semibold capitalize">{VIEW_ITEMS.find((v) => v.key === view)?.label ?? view}</h3>
           <div className="flex items-center gap-3">
@@ -138,8 +140,8 @@ export default async function InboxPage({
         </div>
       </section>
 
-      {/* Column 3 — workspace */}
-      <section className="flex min-h-0 flex-col bg-background">
+      {/* Column 3 — workspace (full width on mobile when a conversation is open) */}
+      <section className={cn("min-h-0 flex-col bg-background", hasSelection ? "flex" : "hidden md:flex")}>
         {!detail ? (
           <div className="flex h-full items-center justify-center p-6">
             <EmptyState icon={MessageSquareText} title="Select a conversation" description="Choose a conversation from the list to view the full thread." />
@@ -148,6 +150,9 @@ export default async function InboxPage({
           <>
             <header className="flex items-center justify-between gap-3 border-b border-border bg-card px-5 py-3">
               <div className="flex items-center gap-3">
+                <Link href={`/app/inbox?view=${view}`} className="flex size-8 items-center justify-center rounded-[8px] text-muted-foreground hover:bg-muted md:hidden" aria-label="Back to conversations">
+                  <ArrowLeft className="size-4" />
+                </Link>
                 <Avatar name={contactName(detail.contact)} src={detail.contact?.avatar_url} size={38} />
                 <div>
                   <p className="text-sm font-semibold">{contactName(detail.contact)}</p>
