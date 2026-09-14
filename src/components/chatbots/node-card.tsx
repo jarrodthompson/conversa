@@ -2,7 +2,7 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { AlertTriangle } from "lucide-react";
-import { NODE_DEFS, handlesForNode, type FlowNode, type NodeType } from "@/lib/chatbots/types";
+import { NODE_DEFS, type FlowNode, type NodeType } from "@/lib/chatbots/types";
 import { NODE_W, NODE_H } from "@/lib/chatbots/geometry";
 import { cn } from "@/lib/utils";
 
@@ -74,9 +74,9 @@ export function NodeCard({
         {hasIssue && <AlertTriangle className="size-4 shrink-0 text-warning" />}
       </button>
 
-      {/* output handles (multiple_choice derives one per option) */}
-      {handlesForNode(node).map((h, i, arr) => {
-        const k = arr.length;
+      {/* output handles */}
+      {def.handles.map((h, i) => {
+        const k = def.handles.length;
         const left = ((i + 1) / (k + 1)) * 100;
         return (
           <span key={h.id} className="absolute" style={{ left: `${left}%`, top: NODE_H, transform: "translate(-50%,-50%)" }}>

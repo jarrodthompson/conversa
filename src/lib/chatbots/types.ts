@@ -74,19 +74,6 @@ export const PALETTE_ORDER: NodeType[] = [
   "add_tag", "update_field", "webhook", "delay", "end",
 ];
 
-/**
- * Output handles for a node. Most are static (from NODE_DEFS), but a
- * multiple_choice node's branches are derived from its options — one handle per
- * option, id `opt{index}` (matching the simulator and engine).
- */
-export function handlesForNode(node: FlowNode): { id: string; label: string }[] {
-  if (node.type === "multiple_choice") {
-    const opts = (node.data?.options as string[] | undefined) ?? [];
-    return opts.map((label, i) => ({ id: `opt${i}`, label }));
-  }
-  return NODE_DEFS[node.type as NodeType].handles;
-}
-
 export function newNodeId() {
   return "n_" + Math.random().toString(36).slice(2, 9);
 }
