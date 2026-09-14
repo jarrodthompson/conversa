@@ -8,13 +8,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { sendReplyAction, addNoteAction } from "@/lib/data/conversation-actions";
+import { sendReplyAction, addNoteAction, generateDraftAction } from "@/lib/data/conversation-actions";
 
 export function Composer({ conversationId }: { conversationId: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"reply" | "note">("reply");
   const [value, setValue] = useState("");
   const [pending, startTransition] = useTransition();
+  const [drafting, setDrafting] = useState(false);
 
   function submit(resolveAfter = false) {
     const text = value.trim();
@@ -40,13 +41,20 @@ export function Composer({ conversationId }: { conversationId: string }) {
     });
   }
 
-  /** Deterministic demo "AI suggestion" — clearly labelled, not a live provider. */
+  /** Generates an AI-suggested reply draft (live provider when configured). */
   function aiSuggest() {
     setMode("reply");
-    setValue(
-      "Thanks for getting in touch — I'd be happy to help with this. I've checked your account and can confirm the next steps below. (AI-suggested draft — please review before sending.)",
-    );
-    toast.info("AI draft inserted — review before sending");
+    setDrafting(true);
+    (async () => {
+      const res = await generateDraftAction(conversationId);
+      setDrafting(false);
+      if (res?.error) {
+        toast.error(res.error);
+        return;
+      }
+      setValue(res.text ?? "");
+      toast.info(res.live ? "AI draft ready — review before sending" : "Draft ready (add an AI key for smarter drafts) — review before sending");
+    })();
   }
 
   return (
@@ -72,9 +80,10 @@ export function Composer({ conversationId }: { conversationId: string }) {
         </button>
         <button
           onClick={aiSuggest}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-secondary"
+          disabled={drafting}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-secondary disabled:opacity-50"
         >
-          <Sparkles className="size-3.5" /> AI draft
+          <Sparkles className={cn("size-3.5", drafting && "animate-pulse")} /> {drafting ? "Drafting…" : "AI draft"}
         </button>
       </div>
 

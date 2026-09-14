@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAppContext } from "@/lib/auth/context";
 import { sendWhatsAppText } from "@/lib/channels/whatsapp/send";
 import { sendEmail } from "@/lib/channels/email/send";
+import { generateReplyDraft, type DraftMessage } from "@/lib/ai/provider";
 import type { Json } from "@/lib/supabase/types";
 
 const asJson = (v: unknown): Json => v as Json;
@@ -154,6 +155,51 @@ export async function sendReplyAction(conversationId: string, body: string) {
   revalidatePath("/app/inbox");
   if (deliveryError) return { error: `Message saved but not delivered: ${deliveryError}` };
   return { ok: true };
+}
+
+/**
+ * Generates an AI-suggested reply draft for a conversation. Uses the live
+ * Anthropic provider when configured, otherwise a deterministic draft. Read-only
+ * — it never sends; the agent reviews and edits before sending.
+ */
+export async function generateDraftAction(conversationId: string) {
+  const { supabase, orgId } = await ctx();
+  const c = await getAppContext();
+
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("channel_type, subject, contact:contacts(first_name, last_name)")
+    .eq("id", conversationId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!conv) return { error: "Conversation not found" };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cv = conv as any;
+  const contact = firstOf<{ first_name: string | null; last_name: string | null }>(cv.contact);
+  const contactName = [contact?.first_name, contact?.last_name].filter(Boolean).join(" ") || null;
+
+  const { data: msgs } = await supabase
+    .from("messages")
+    .select("direction, body, author_type")
+    .eq("conversation_id", conversationId)
+    .eq("organisation_id", orgId)
+    .order("created_at", { ascending: true })
+    .limit(12);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const history: DraftMessage[] = ((msgs ?? []) as any[])
+    .filter((m) => (m.body ?? "").trim())
+    .map((m) => ({ role: m.direction === "inbound" ? "customer" : "agent", body: m.body as string }));
+
+  if (history.length === 0) return { error: "No messages to draft from yet" };
+
+  const res = await generateReplyDraft({
+    channel: cv.channel_type ?? "email",
+    subject: cv.subject ?? null,
+    contactName,
+    orgName: c.org.name,
+    messages: history,
+  });
+  return { ok: true, text: res.text, live: res.live };
 }
 
 export async function addNoteAction(conversationId: string, body: string) {
