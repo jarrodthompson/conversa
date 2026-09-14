@@ -75,10 +75,12 @@ export async function generateReplyDraft(ctx: DraftContext): Promise<DraftResult
       (ctx.contactName ? `Customer name: ${ctx.contactName}\n` : "") +
       `\nConversation so far:\n${convo}\n\nWrite the agent's next reply.`;
 
+    // `effort` is supported on Opus/Sonnet (5-family) but rejected by Haiku 4.5.
+    const supportsEffort = /claude-(opus|sonnet)/.test(model);
     const res = await client.messages.create({
       model,
       max_tokens: 1024,
-      output_config: { effort: "low" },
+      ...(supportsEffort ? { output_config: { effort: "low" as const } } : {}),
       system,
       messages: [{ role: "user", content: user }],
     });
