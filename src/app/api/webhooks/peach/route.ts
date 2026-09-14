@@ -22,8 +22,11 @@ function parseBody(raw: string, contentType: string): Record<string, unknown> {
 
 /** Peach Payments webhook — verifies HMAC, then activates the paid plan. */
 export async function POST(request: NextRequest) {
+  // Acknowledge validation pings even before env is set, so the webhook can be
+  // added in the Peach dashboard before secrets are configured. No-op until
+  // fully configured; real events are signature-verified below.
   if (!peachConfigured() || !process.env.PEACH_WEBHOOK_SECRET) {
-    return new NextResponse("Peach not configured", { status: 503 });
+    return NextResponse.json({ received: true, configured: false });
   }
 
   const raw = await request.text();
