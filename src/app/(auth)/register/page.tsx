@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { Suspense, useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { signUpAction, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -17,20 +18,22 @@ function SubmitButton() {
   );
 }
 
-export default function RegisterPage() {
-  const [state, formAction] = useActionState<AuthState, FormData>(
-    signUpAction,
-    undefined,
-  );
+function RegisterForm() {
+  const [state, formAction] = useActionState<AuthState, FormData>(signUpAction, undefined);
+  const sp = useSearchParams();
+  const next = sp.get("next") ?? "";
+  const invited = Boolean(sp.get("email"));
+  const [email, setEmail] = useState(sp.get("email") ?? "");
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Start free</h1>
+      <h1 className="text-2xl font-bold tracking-tight">{invited ? "Accept your invitation" : "Start free"}</h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        Create your account and set up your first workspace.
+        {invited ? "Create your account to join your team's workspace." : "Create your account and set up your first workspace."}
       </p>
 
       <form action={formAction} className="mt-8 space-y-4">
+        <input type="hidden" name="next" value={next} />
         {state?.error && (
           <p className="rounded-[10px] border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
             {state.error}
@@ -47,7 +50,7 @@ export default function RegisterPage() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="email">Work email</Label>
-          <Input id="email" name="email" type="email" autoComplete="email" placeholder="you@company.com" required />
+          <Input id="email" name="email" type="email" autoComplete="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} readOnly={invited} required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
@@ -66,5 +69,13 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

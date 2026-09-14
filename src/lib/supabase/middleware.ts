@@ -80,10 +80,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Signed-in users landing on auth pages go to the app.
+  // Signed-in users landing on auth pages go to the app (or their pending
+  // destination, e.g. an invitation link they were asked to sign in for).
   if (user && ["/login", "/register"].includes(pathname)) {
+    const nextParam = request.nextUrl.searchParams.get("next");
     const url = request.nextUrl.clone();
-    url.pathname = "/app/inbox";
+    url.pathname = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/app/inbox";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

@@ -14,6 +14,12 @@ export type AuthState = { error?: string; message?: string } | undefined;
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+/** Only allow same-site relative redirects (prevents open-redirect abuse). */
+function safeNext(value: FormDataEntryValue | null): string | null {
+  const s = typeof value === "string" ? value : "";
+  return s.startsWith("/") && !s.startsWith("//") ? s : null;
+}
+
 export async function signInAction(
   _prev: AuthState,
   formData: FormData,
@@ -30,7 +36,7 @@ export async function signInAction(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: error.message };
 
-  redirect("/app/inbox");
+  redirect(safeNext(formData.get("next")) ?? "/app/inbox");
 }
 
 export async function signUpAction(
@@ -46,13 +52,14 @@ export async function signUpAction(
     return { error: parsed.error.issues[0]?.message ?? "Invalid details" };
   }
 
+  const next = safeNext(formData.get("next")) ?? "/onboarding";
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${appUrl}/auth/callback?next=/onboarding`,
+      emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) return { error: error.message };
@@ -64,7 +71,7 @@ export async function signUpAction(
         "Check your inbox to verify your email address, then sign in to continue.",
     };
   }
-  redirect("/onboarding");
+  redirect(next);
 }
 
 export async function signOutAction() {

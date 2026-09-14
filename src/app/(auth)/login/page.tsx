@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { signInAction, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,10 @@ function SubmitButton() {
   );
 }
 
-export default function LoginPage() {
-  const [state, formAction] = useActionState<AuthState, FormData>(
-    signInAction,
-    undefined,
-  );
+function LoginForm() {
+  const [state, formAction] = useActionState<AuthState, FormData>(signInAction, undefined);
+  const sp = useSearchParams();
+  const next = sp.get("next") ?? "";
 
   return (
     <div>
@@ -31,6 +31,7 @@ export default function LoginPage() {
       </p>
 
       <form action={formAction} className="mt-8 space-y-4">
+        <input type="hidden" name="next" value={next} />
         {state?.error && (
           <p className="rounded-[10px] border border-error/30 bg-error/10 px-3 py-2 text-sm text-error">
             {state.error}
@@ -59,5 +60,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

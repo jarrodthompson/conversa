@@ -4,6 +4,7 @@ export interface EmailSendOptions {
   to: string;
   subject: string;
   text: string;
+  html?: string;
   replyTo?: string;
 }
 
@@ -18,7 +19,7 @@ export interface EmailSendResult {
  * returns a clearly-labelled demo result without contacting any provider.
  */
 export async function sendEmail(opts: EmailSendOptions): Promise<EmailSendResult> {
-  const { apiKey, from, to, subject, text, replyTo } = opts;
+  const { apiKey, from, to, subject, text, html, replyTo } = opts;
 
   if (!apiKey || !from) {
     return { externalId: `email_DEMO_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, demo: true };
@@ -27,7 +28,7 @@ export async function sendEmail(opts: EmailSendOptions): Promise<EmailSendResult
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
-    body: JSON.stringify({ from, to: [to], subject, text, reply_to: replyTo }),
+    body: JSON.stringify({ from, to: [to], subject, text, ...(html ? { html } : {}), reply_to: replyTo }),
   });
 
   if (!res.ok) {

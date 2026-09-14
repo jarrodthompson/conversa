@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { can } from "@/lib/auth/roles";
 import { PageHeader } from "@/components/app/page-header";
 import { TeamManager } from "@/components/settings/team-manager";
+import { InviteManager } from "@/components/settings/invite-manager";
 
 interface MemberRow {
   user_id: string; role: string;
@@ -23,13 +24,23 @@ export default async function TeamSettingsPage() {
     return { user_id: m.user_id, role: m.role, full_name: p?.full_name ?? null, avatar_url: p?.avatar_url ?? null };
   });
 
+  const canManage = can(role, "settings.manage");
+  const { data: inviteRows } = await supabase
+    .from("organisation_invitations")
+    .select("id, email, role, expires_at")
+    .eq("organisation_id", org.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  const invites = (inviteRows ?? []) as unknown as { id: string; email: string; role: string; expires_at: string }[];
+
   return (
     <div className="p-6">
       <PageHeader title="Team & Roles" description="Manage who has access and what they can do." />
-      <div className="mt-6 max-w-2xl">
-        <TeamManager members={members} canManage={can(role, "settings.manage")} meId={userId} />
-        {!can(role, "settings.manage") && (
-          <p className="mt-3 text-xs text-muted-foreground">Only owners and administrators can change roles.</p>
+      <div className="mt-6 max-w-2xl space-y-6">
+        <InviteManager invites={invites} canManage={canManage} />
+        <TeamManager members={members} canManage={canManage} meId={userId} />
+        {!canManage && (
+          <p className="mt-3 text-xs text-muted-foreground">Only owners and administrators can invite people or change roles.</p>
         )}
       </div>
     </div>
