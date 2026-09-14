@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/app/empty-state";
 import { createFlowAction } from "@/lib/chatbots/actions";
+import { DeleteFlowButton } from "@/components/chatbots/flow-actions";
 
 interface Flow {
   id: string; name: string; description: string | null; status: string;
@@ -49,9 +50,12 @@ export default async function ChatbotsPage() {
                 <h3 className="mt-3 font-semibold">{f.name}</h3>
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{f.description}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{(f.definition?.nodes?.length ?? 0)} nodes · {f.channels.join(", ") || "no channel"}</p>
-                <Link href={`/app/chatbots/${f.id}`}>
-                  <Button variant="outline" size="sm" className="mt-4">Open builder</Button>
-                </Link>
+                <div className="mt-4 flex items-center justify-between">
+                  <Link href={`/app/chatbots/${f.id}`}>
+                    <Button variant="outline" size="sm">Open builder</Button>
+                  </Link>
+                  <DeleteFlowButton flowId={f.id} name={f.name} />
+                </div>
               </CardContent>
             </Card>
           ))

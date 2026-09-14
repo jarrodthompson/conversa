@@ -78,6 +78,18 @@ export async function publishFlowAction(flowId: string, name: string, definition
   return { ok: true, version: nextVersion };
 }
 
+export async function deleteFlowAction(flowId: string) {
+  const { supabase, org } = await guard(flowId);
+  const { error } = await supabase
+    .from("chatbot_flows")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", flowId)
+    .eq("organisation_id", org.id);
+  if (error) return { error: error.message };
+  revalidatePath("/app/chatbots");
+  return { ok: true };
+}
+
 export async function duplicateFlowAction(flowId: string) {
   const { supabase, org, userId } = await guard(flowId);
   const { data: src } = await supabase
