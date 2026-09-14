@@ -47,9 +47,16 @@ export interface CreateCheckoutResult {
 /** Creates a Hosted Checkout (V2) and returns the redirect URL for the customer. */
 export async function createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult> {
   const token = await getAccessToken();
+  // Peach requires a Referer/Origin matching an allowlisted domain.
+  const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "https://conversa.co.za").replace(/\/$/, "");
   const res = await fetch(`${CHECKOUT_BASE}/v2/checkout`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "content-type": "application/json",
+      Referer: `${origin}/`,
+      Origin: origin,
+    },
     body: JSON.stringify({
       entityId: process.env.PEACH_ENTITY_ID,
       amount: input.amount,
