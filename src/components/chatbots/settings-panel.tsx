@@ -56,10 +56,10 @@ export function SettingsPanel({ node, onChange, onDelete }: Props) {
             <Field label="Options (one per line)">
               <Textarea
                 value={((d.options as string[]) ?? []).join("\n")}
-                onChange={(e) => onChange({ options: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
+                onChange={(e) => onChange({ options: e.target.value.split("\n") })}
                 rows={4}
               />
-              <p className="mt-1 text-xs text-muted-foreground">Each option becomes a branch handle on the node.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Shown to the customer as buttons. The flow continues to the next node.</p>
             </Field>
           </>
         )}

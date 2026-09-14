@@ -103,7 +103,7 @@ function nodeSummary(n: FlowNode): string {
   switch (n.type) {
     case "send_message": return String(d.message ?? "");
     case "ask_question": return String(d.question ?? "");
-    case "multiple_choice": return ((d.options as string[]) ?? []).join(" · ");
+    case "multiple_choice": return ((d.options as string[]) ?? []).map((s) => String(s).trim()).filter(Boolean).join(" · ");
     case "condition": return `${d.field ?? "?"} ${d.op ?? ""} ${d.value ?? ""}`;
     case "assign_team": return `Team: ${d.team ?? "?"}`;
     case "add_tag": return d.tag ? `Tag: ${d.tag}` : "No tag set";

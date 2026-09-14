@@ -53,7 +53,11 @@ export function stepFlow(
       state[v] = input?.text ?? "";
       current = byId.get(outTarget(def, node.id) ?? "");
     } else if (node.type === "multiple_choice") {
-      current = byId.get(outTarget(def, node.id, input?.handle ?? "opt0") ?? "");
+      // Single output: capture the chosen label, then continue to the next node.
+      const opts = ((node.data.options as string[] | undefined) ?? []).map((s) => s.trim()).filter(Boolean);
+      const idx = input?.handle ? Number.parseInt(input.handle.replace("opt", ""), 10) : NaN;
+      if (!Number.isNaN(idx) && opts[idx]) state["choice"] = opts[idx];
+      current = byId.get(outTarget(def, node.id) ?? "");
     } else {
       current = byId.get(outTarget(def, node.id) ?? "");
     }
@@ -77,7 +81,7 @@ export function stepFlow(
         steps.push({ nodeId: n.id, type: n.type, say: "Could you share your email address?", awaitsInput: true, variable: "email" });
         return { steps, nextNodeId: n.id, vars: state };
       case "multiple_choice": {
-        const options = (n.data.options as string[] | undefined) ?? [];
+        const options = ((n.data.options as string[] | undefined) ?? []).map((s) => s.trim()).filter(Boolean);
         steps.push({
           nodeId: n.id, type: n.type,
           say: interpolate(String(n.data.prompt ?? "Choose:"), state),
