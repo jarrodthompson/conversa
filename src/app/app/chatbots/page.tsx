@@ -54,7 +54,14 @@ export default async function ChatbotsPage() {
                   <Link href={`/app/chatbots/${f.id}`}>
                     <Button variant="outline" size="sm">Open builder</Button>
                   </Link>
-                  <DeleteFlowButton flowId={f.id} name={f.name} />
+                  <div className="flex items-center gap-1">
+                    {f.status === "published" && (
+                      <a href={`/widget/${f.id}`} target="_blank" rel="noreferrer">
+                        <Button variant="ghost" size="sm">Open live chat ↗</Button>
+                      </a>
+                    )}
+                    <DeleteFlowButton flowId={f.id} name={f.name} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
