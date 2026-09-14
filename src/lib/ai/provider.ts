@@ -50,7 +50,11 @@ export async function generateReplyDraft(ctx: DraftContext): Promise<DraftResult
 
   try {
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
-    const client = new Anthropic();
+    // Org-scoped keys need a workspace id header; workspace-scoped keys don't.
+    const workspaceId = process.env.ANTHROPIC_WORKSPACE_ID;
+    const client = new Anthropic(
+      workspaceId ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } } : {},
+    );
     const model = process.env.AI_MODEL || "claude-opus-5";
 
     const org = ctx.orgName ?? "our company";
