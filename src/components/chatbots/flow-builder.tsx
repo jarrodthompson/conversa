@@ -99,8 +99,12 @@ export function FlowBuilder({
         const opts = ((src.data.options as string[] | undefined) ?? []).map((s) => String(s).trim()).filter(Boolean);
         const existing = es.filter((e) => e.source === connecting.source);
         if (existing.some((e) => e.target === target)) { toast.error("That option is already connected to this node"); return es; }
-        if (existing.length >= opts.length) { toast.error(`All ${opts.length} options are already connected`); return es; }
-        return [...es, { id: newEdgeId(), source: connecting.source, target, sourceHandle: `opt${existing.length}` }];
+        // Fill the first unused option slot so gaps (from a deleted branch) map correctly.
+        const used = new Set(existing.map((e) => e.sourceHandle));
+        let idx = -1;
+        for (let i = 0; i < opts.length; i++) if (!used.has(`opt${i}`)) { idx = i; break; }
+        if (idx === -1) { toast.error(`All ${opts.length} options are already connected`); return es; }
+        return [...es, { id: newEdgeId(), source: connecting.source, target, sourceHandle: `opt${idx}` }];
       }
       // Every other node: one edge per source-handle (replace on reconnect).
       const filtered = es.filter((e) => !(e.source === connecting.source && (e.sourceHandle ?? "out") === connecting.handle));
