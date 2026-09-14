@@ -324,8 +324,8 @@ const testimonials = [
 ];
 
 const plans = [
-  { name: "Starter", price: "$0", suffix: "/mo", features: ["1 inbox", "3 team members", "Website chat", "Basic reports"], featured: false },
-  { name: "Growth", price: "$49", suffix: "/mo", features: ["Multiple channels", "10 team members", "AI agents & chatbots", "Advanced reports"], featured: true },
-  { name: "Business", price: "$149", suffix: "/mo", features: ["Higher limits", "Multiple teams", "Advanced routing", "API access"], featured: false },
+  { name: "Starter", price: "R0", suffix: "/mo", features: ["1 inbox", "3 team members", "Website chat", "Basic reports"], featured: false },
+  { name: "Growth", price: "R900", suffix: "/mo", features: ["Multiple channels", "10 team members", "AI agents & chatbots", "Advanced reports"], featured: true },
+  { name: "Business", price: "R2 700", suffix: "/mo", features: ["Higher limits", "Multiple teams", "Advanced routing", "API access"], featured: false },
   { name: "Enterprise", price: "Custom", suffix: "", features: ["SSO", "Security review", "Dedicated support", "Audit logs"], featured: false },
 ];
