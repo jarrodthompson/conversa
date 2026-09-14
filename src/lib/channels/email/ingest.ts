@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { EmailWebhookPayload, EmailEventData } from "@/lib/channels/email/types";
+import { fetchReceivedEmail } from "@/lib/channels/email/receive";
 import { runAutomations } from "@/lib/automations/engine";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,7 +123,15 @@ async function handleStatus(db: DB, type: string, data: EmailEventData): Promise
 export async function ingestEmailPayload(db: DB, payload: EmailWebhookPayload, eventId: string): Promise<EmailIngestResult> {
   const result: EmailIngestResult = { inbound: 0, statuses: 0, duplicates: 0, unmatched: 0 };
   const type = payload.type ?? "";
-  const data = payload.data ?? {};
+  let data = payload.data ?? {};
+
+  // Resend's `email.received` webhook is metadata-only: fetch the full message
+  // (from/to/subject/body) from the Receiving API before routing it.
+  const isReceived = type.includes("received") || type.includes("inbound");
+  if (isReceived && data.email_id && !data.text && !data.html) {
+    const full = await fetchReceivedEmail(data.email_id, process.env.RESEND_API_KEY);
+    if (full) data = { ...data, ...full };
+  }
 
   // Resolve an org for the webhook_events row where possible (best-effort).
   const to = firstRecipient(data.to);
