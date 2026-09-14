@@ -101,7 +101,8 @@ export function BroadcastComposer(props: {
     start(async () => {
       const res = await sendTestAction(props.id, channel, testTo);
       if (res?.error) toast.error(res.error);
-      else toast.success("Test queued");
+      else if (res.warning) toast.warning(res.warning);
+      else toast.success(res.live ? `Test sent to ${testTo}` : "Test queued");
     });
   }
 
@@ -119,9 +120,13 @@ export function BroadcastComposer(props: {
       if (!(await saveOnly(true))) return;
       const res = await dispatchBroadcastAction(props.id, scheduleMode);
       if (res?.error) { toast.error(res.error); return; }
-      const r = res as { scheduled?: number; sent?: number };
+      const r = res as { scheduled?: number; sent?: number; failed?: number; live?: boolean };
       if (scheduleMode === "schedule") { setStatus("scheduled"); toast.success(`Scheduled for ${r.scheduled ?? 0} recipients`); }
-      else { setStatus("sent"); toast.success(`Sent to ${r.sent ?? 0} recipients`); }
+      else {
+        setStatus("sent");
+        const suffix = r.failed ? `, ${r.failed} failed` : "";
+        toast.success(`${r.live ? "Sent" : "Simulated"} to ${r.sent ?? 0} recipients${suffix}`);
+      }
       router.refresh();
     });
   }
@@ -289,7 +294,7 @@ export function BroadcastComposer(props: {
               <Button className="w-full" onClick={dispatch} disabled={pending || (props.requiresApproval && !approved)}>
                 {scheduleMode === "schedule" ? <><CalendarClock className="size-4" /> Schedule broadcast</> : <><Rocket className="size-4" /> Send now</>}
               </Button>
-              <p className="text-xs text-muted-foreground">Recipients are recorded and delivery is simulated — no live provider is contacted.</p>
+              <p className="text-xs text-muted-foreground">Email and WhatsApp are delivered live when the channel is connected; other channels are simulated.</p>
             </div>
           ) : (
             <div>
@@ -304,7 +309,7 @@ export function BroadcastComposer(props: {
                 ))}
               </ul>
               <div className="mt-3 rounded-[10px] bg-muted/60 p-2 text-xs text-muted-foreground">
-                <ChannelIcon type={channel} className="mr-1 inline size-3.5" /> {total} recipients · statuses simulated.
+                <ChannelIcon type={channel} className="mr-1 inline size-3.5" /> {total} recipients · consent &amp; suppression enforced.
               </div>
             </div>
           )}
