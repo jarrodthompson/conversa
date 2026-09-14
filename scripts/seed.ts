@@ -400,20 +400,22 @@ async function main() {
   // ── Chatbot flows (2) ──────────────────────────────────────────────────────
   const welcomeFlow = {
     nodes: [
-      { id: "start", type: "start", position: { x: 260, y: 60 }, data: {} },
-      { id: "msg1", type: "send_message", position: { x: 260, y: 180 }, data: { message: "Welcome to Grovefield! How can we help?" } },
-      { id: "choice", type: "multiple_choice", position: { x: 260, y: 300 }, data: { prompt: "Choose an option:", options: ["Track order", "Returns", "Talk to a human"] } },
-      { id: "order", type: "collect_order", position: { x: 60, y: 440 }, data: { variable: "order_number" } },
-      { id: "end", type: "end", position: { x: 60, y: 560 }, data: {} },
-      { id: "handoff", type: "human_handoff", position: { x: 440, y: 460 }, data: { team: "Support" } },
+      { id: "start", type: "start", position: { x: 300, y: 60 }, data: {} },
+      { id: "msg1", type: "send_message", position: { x: 300, y: 180 }, data: { message: "Welcome to Grovefield! How can we help?" } },
+      { id: "choice", type: "multiple_choice", position: { x: 300, y: 300 }, data: { prompt: "Choose an option:", options: ["Track order", "Returns", "Talk to a human"] } },
+      { id: "order", type: "collect_order", position: { x: 40, y: 450 }, data: { variable: "order_number" } },
+      { id: "agent", type: "assign_agent", position: { x: 320, y: 450 }, data: { agentId: "" } },
+      { id: "handoff", type: "human_handoff", position: { x: 600, y: 450 }, data: { team: "Support" } },
+      { id: "end", type: "end", position: { x: 180, y: 610 }, data: {} },
     ],
     edges: [
       { id: "e1", source: "start", target: "msg1" },
       { id: "e2", source: "msg1", target: "choice" },
-      { id: "e3", source: "choice", target: "order", sourceHandle: "opt0" },  // Track order
-      { id: "e4", source: "order", target: "end" },
-      { id: "e5", source: "choice", target: "handoff", sourceHandle: "opt1" }, // Returns
-      { id: "e6", source: "choice", target: "handoff", sourceHandle: "opt2" }, // Talk to a human
+      { id: "e3", source: "choice", target: "order", sourceHandle: "opt0" },   // Track order
+      { id: "e4", source: "choice", target: "agent", sourceHandle: "opt1" },   // Returns
+      { id: "e5", source: "choice", target: "handoff", sourceHandle: "opt2" }, // Talk to a human
+      { id: "e6", source: "order", target: "end" },
+      { id: "e7", source: "agent", target: "end" },
     ],
   };
   await db.from("chatbot_flows").insert([
