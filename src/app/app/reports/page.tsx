@@ -40,6 +40,42 @@ export default async function ReportsPage() {
   const containment = total > 0 ? Math.round((ai / total) * 100) : 0;
   const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
+  // ── Avg first response: first inbound → first outbound, over the last 30 days ──
+  const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  const { data: msgRows } = await supabase
+    .from("messages")
+    .select("conversation_id, direction, created_at")
+    .eq("organisation_id", org.id)
+    .gte("created_at", since)
+    .order("created_at", { ascending: true })
+    .limit(5000);
+  const firstIn = new Map<string, string>();
+  const firstOut = new Map<string, string>();
+  for (const m of (msgRows ?? []) as { conversation_id: string; direction: string; created_at: string }[]) {
+    if (m.direction === "inbound" && !firstIn.has(m.conversation_id)) firstIn.set(m.conversation_id, m.created_at);
+    if (m.direction === "outbound" && !firstOut.has(m.conversation_id)) firstOut.set(m.conversation_id, m.created_at);
+  }
+  let frtSum = 0;
+  let frtN = 0;
+  for (const [cid, inAt] of firstIn) {
+    const outAt = firstOut.get(cid);
+    if (outAt && new Date(outAt).getTime() > new Date(inAt).getTime()) {
+      frtSum += new Date(outAt).getTime() - new Date(inAt).getTime();
+      frtN++;
+    }
+  }
+  const avgFrtMin = frtN > 0 ? frtSum / frtN / 60000 : 0;
+  const avgFirstResponse = frtN === 0 ? "—" : avgFrtMin < 60 ? `${Math.round(avgFrtMin)}m` : `${(avgFrtMin / 60).toFixed(1)}h`;
+
+  // ── Reopen rate: previously-resolved conversations now back in an open state ──
+  const [everResolved, reopened] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    count(supabase, org.id, (q: any) => q.not("resolved_at", "is", null)),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    count(supabase, org.id, (q: any) => q.not("resolved_at", "is", null).neq("status", "resolved")),
+  ]);
+  const reopenRate = everResolved > 0 ? Math.round((reopened / everResolved) * 100) : 0;
+
   const channelData = channels.map((c, i) => ({ name: { whatsapp: "WhatsApp", email: "Email", web_chat: "Web Chat" }[c] ?? c, value: channelCounts[i] }));
   const statusData = statuses.map((s, i) => ({ name: s, value: statusCounts[i] })).filter((d) => d.value > 0);
 
@@ -82,9 +118,9 @@ export default async function ReportsPage() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         {[
-          { icon: Clock, label: "Avg first response", value: "12m", note: "Across all channels" },
+          { icon: Clock, label: "Avg first response", value: avgFirstResponse, note: "First inbound → first reply (30d)" },
           { icon: Sparkles, label: "Human handoff rate", value: `${Math.max(0, 100 - containment)}%`, note: "Conversations needing an agent" },
-          { icon: CheckCircle2, label: "Reopen rate", value: "4%", note: "Last 30 days" },
+          { icon: CheckCircle2, label: "Reopen rate", value: `${reopenRate}%`, note: "Resolved then reopened" },
         ].map((m) => (
           <Card key={m.label}>
             <CardContent className="flex items-center gap-3 p-5">
