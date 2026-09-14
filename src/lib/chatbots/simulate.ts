@@ -53,11 +53,11 @@ export function stepFlow(
       state[v] = input?.text ?? "";
       current = byId.get(outTarget(def, node.id) ?? "");
     } else if (node.type === "multiple_choice") {
-      // Single output: capture the chosen label, then continue to the next node.
+      // One dot, but each option is its own outgoing edge (sourceHandle opt{i}).
       const opts = ((node.data.options as string[] | undefined) ?? []).map((s) => s.trim()).filter(Boolean);
-      const idx = input?.handle ? Number.parseInt(input.handle.replace("opt", ""), 10) : NaN;
+      const idx = input?.handle ? Number.parseInt(input.handle.replace("opt", ""), 10) : 0;
       if (!Number.isNaN(idx) && opts[idx]) state["choice"] = opts[idx];
-      current = byId.get(outTarget(def, node.id) ?? "");
+      current = byId.get(outTarget(def, node.id, input?.handle ?? "opt0") ?? "");
     } else {
       current = byId.get(outTarget(def, node.id) ?? "");
     }

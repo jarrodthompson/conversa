@@ -400,15 +400,20 @@ async function main() {
   // ── Chatbot flows (2) ──────────────────────────────────────────────────────
   const welcomeFlow = {
     nodes: [
-      { id: "start", type: "start", position: { x: 80, y: 80 }, data: {} },
-      { id: "msg1", type: "send_message", position: { x: 80, y: 200 }, data: { message: "Welcome to Grovefield! How can we help?" } },
-      { id: "choice", type: "multiple_choice", position: { x: 80, y: 320 }, data: { prompt: "Choose an option:", options: ["Track order", "Returns", "Talk to a human"] } },
-      { id: "handoff", type: "human_handoff", position: { x: 80, y: 460 }, data: { team: "Support" } },
+      { id: "start", type: "start", position: { x: 260, y: 60 }, data: {} },
+      { id: "msg1", type: "send_message", position: { x: 260, y: 180 }, data: { message: "Welcome to Grovefield! How can we help?" } },
+      { id: "choice", type: "multiple_choice", position: { x: 260, y: 300 }, data: { prompt: "Choose an option:", options: ["Track order", "Returns", "Talk to a human"] } },
+      { id: "order", type: "collect_order", position: { x: 60, y: 440 }, data: { variable: "order_number" } },
+      { id: "end", type: "end", position: { x: 60, y: 560 }, data: {} },
+      { id: "handoff", type: "human_handoff", position: { x: 440, y: 460 }, data: { team: "Support" } },
     ],
     edges: [
       { id: "e1", source: "start", target: "msg1" },
       { id: "e2", source: "msg1", target: "choice" },
-      { id: "e3", source: "choice", target: "handoff" },
+      { id: "e3", source: "choice", target: "order", sourceHandle: "opt0" },  // Track order
+      { id: "e4", source: "order", target: "end" },
+      { id: "e5", source: "choice", target: "handoff", sourceHandle: "opt1" }, // Returns
+      { id: "e6", source: "choice", target: "handoff", sourceHandle: "opt2" }, // Talk to a human
     ],
   };
   await db.from("chatbot_flows").insert([

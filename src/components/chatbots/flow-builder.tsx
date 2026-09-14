@@ -91,8 +91,18 @@ export function FlowBuilder({
   function completeConnect(target: string) {
     if (!connecting) return;
     if (connecting.source === target) { setConnecting(null); return; }
+    const src = nodes.find((n) => n.id === connecting.source);
     setEdges((es) => {
-      // one edge per source-handle
+      // Multiple Choice: one dot, but one outgoing edge per option (branch by
+      // choice). Assign the next option index (opt0, opt1, …) in connect order.
+      if (src?.type === "multiple_choice") {
+        const opts = ((src.data.options as string[] | undefined) ?? []).map((s) => String(s).trim()).filter(Boolean);
+        const existing = es.filter((e) => e.source === connecting.source);
+        if (existing.some((e) => e.target === target)) { toast.error("That option is already connected to this node"); return es; }
+        if (existing.length >= opts.length) { toast.error(`All ${opts.length} options are already connected`); return es; }
+        return [...es, { id: newEdgeId(), source: connecting.source, target, sourceHandle: `opt${existing.length}` }];
+      }
+      // Every other node: one edge per source-handle (replace on reconnect).
       const filtered = es.filter((e) => !(e.source === connecting.source && (e.sourceHandle ?? "out") === connecting.handle));
       return [...filtered, { id: newEdgeId(), source: connecting.source, target, sourceHandle: connecting.handle }];
     });
@@ -232,11 +242,27 @@ export function FlowBuilder({
                     const s = nodes.find((n) => n.id === e.source);
                     const t = nodes.find((n) => n.id === e.target);
                     if (!s || !t) return null;
-                    const p = edgePath(outputPoint(s, e.sourceHandle ?? "out"), inputPoint(t));
+                    const from = outputPoint(s, e.sourceHandle ?? "out");
+                    const to = inputPoint(t);
+                    const p = edgePath(from, to);
+                    // Label branch edges (Multiple Choice option, Condition true/false).
+                    let label: string | null = null;
+                    if (s.type === "multiple_choice" && e.sourceHandle?.startsWith("opt")) {
+                      const opts = ((s.data.options as string[] | undefined) ?? []).map((o) => String(o).trim()).filter(Boolean);
+                      label = opts[Number.parseInt(e.sourceHandle.replace("opt", ""), 10)] ?? null;
+                    }
+                    const mx = (from.x + to.x) / 2;
+                    const my = (from.y + to.y) / 2;
                     return (
                       <g key={e.id}>
                         <path d={p} fill="none" stroke="#06B6D4" strokeWidth={2} markerEnd="url(#arrow)" />
                         <path d={p} fill="none" stroke="transparent" strokeWidth={14} className="pointer-events-auto cursor-pointer" onClick={() => { setEdges((es) => es.filter((x) => x.id !== e.id)); markDirty(); }} />
+                        {label && (
+                          <>
+                            <rect x={mx - label.length * 3.4 - 6} y={my - 9} width={label.length * 6.8 + 12} height={18} rx={9} fill="#ECFEFF" stroke="#A5F3FC" />
+                            <text x={mx} y={my + 3} textAnchor="middle" fontSize={10} fill="#0E7490" fontWeight={600}>{label}</text>
+                          </>
+                        )}
                       </g>
                     );
                   })}
