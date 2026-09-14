@@ -1,10 +1,11 @@
 "use server";
 
+import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAppContext } from "@/lib/auth/context";
 import { can } from "@/lib/auth/roles";
-import { stripeConfigured, getStripe } from "@/lib/billing/stripe";
+import { peachConfigured, createCheckout } from "@/lib/billing/peach";
 import { changePlanAction } from "@/lib/settings/actions";
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -16,87 +17,70 @@ async function manageCtx() {
   return { c, supabase, orgId: c.org.id };
 }
 
-/** Whether live Stripe checkout is available (keys set). */
+/** Whether live Peach checkout is available (credentials set). */
 export async function billingConfigured(): Promise<boolean> {
-  return stripeConfigured();
+  return peachConfigured();
 }
 
 /**
- * Starts a subscription. With Stripe configured, returns a Checkout URL to
- * redirect to; otherwise falls back to the DB-only plan switch so the app still
- * works without a payment provider.
+ * Starts a plan purchase. With Peach configured, creates a Hosted Checkout and
+ * returns the redirect URL; otherwise falls back to the DB-only plan switch so
+ * the app still works without a payment provider.
  */
 export async function startCheckoutAction(planId: string) {
-  const { c, supabase, orgId } = await manageCtx();
+  const { supabase, orgId } = await manageCtx();
 
-  if (!stripeConfigured()) {
+  if (!peachConfigured()) {
     const res = await changePlanAction(planId);
     return res?.error ? res : { ok: true, demo: true as const };
   }
 
   const { data: plan } = await supabase
     .from("subscription_plans")
-    .select("key, name, stripe_price_id")
+    .select("key, name, price_monthly, currency")
     .eq("id", planId)
     .maybeSingle();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = plan as any;
   if (!p) return { error: "Plan not found" };
-  if (!p.stripe_price_id) return { error: `No Stripe price configured for the ${p.name} plan` };
+  if (!p.price_monthly || p.price_monthly <= 0) return { error: `The ${p.name} plan has no price to charge` };
 
-  const { data: sub } = await supabase
-    .from("organisation_subscriptions")
-    .select("stripe_customer_id")
-    .eq("organisation_id", orgId)
-    .maybeSingle();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let customerId = (sub as any)?.stripe_customer_id as string | undefined;
+  const amount = (p.price_monthly / 100).toFixed(2);
+  const currency = (p.currency ?? "ZAR").toUpperCase();
+  // 8-16 char merchant reference.
+  const merchantTransactionId = `sub${crypto.randomBytes(6).toString("hex")}`.slice(0, 16);
 
-  const stripe = getStripe();
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: c.email,
-      name: c.org.name,
-      metadata: { organisation_id: orgId },
+  try {
+    const { checkoutId, redirectUrl } = await createCheckout({
+      amount,
+      currency,
+      merchantTransactionId,
+      shopperResultUrl: `${appUrl}/api/billing/return`,
+      notificationUrl: `${appUrl}/api/webhooks/peach`,
     });
-    customerId = customer.id;
+
+    // Remember which plan this checkout will activate (applied by the webhook).
     await supabase
       .from("organisation_subscriptions")
-      .upsert({ organisation_id: orgId, stripe_customer_id: customerId }, { onConflict: "organisation_id" });
+      .upsert(
+        { organisation_id: orgId, peach_checkout_id: checkoutId, peach_pending_plan_id: planId },
+        { onConflict: "organisation_id" },
+      );
+
+    return { ok: true, url: redirectUrl };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Could not start checkout" };
   }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: p.stripe_price_id, quantity: 1 }],
-    success_url: `${appUrl}/app/settings/billing?checkout=success`,
-    cancel_url: `${appUrl}/app/settings/billing?checkout=cancelled`,
-    allow_promotion_codes: true,
-    metadata: { organisation_id: orgId, plan_id: planId },
-    subscription_data: { metadata: { organisation_id: orgId, plan_id: planId } },
-  });
-
-  return { ok: true, url: session.url };
 }
 
-/** Opens the Stripe customer portal for managing/cancelling the subscription. */
-export async function openPortalAction() {
+/** Cancels auto-renewal / marks the subscription cancelled (no further charges). */
+export async function cancelSubscriptionAction() {
   const { supabase, orgId } = await manageCtx();
-  if (!stripeConfigured()) return { error: "Billing portal is not available (Stripe not configured)" };
-
-  const { data: sub } = await supabase
+  const { error } = await supabase
     .from("organisation_subscriptions")
-    .select("stripe_customer_id")
-    .eq("organisation_id", orgId)
-    .maybeSingle();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customerId = (sub as any)?.stripe_customer_id as string | undefined;
-  if (!customerId) return { error: "No billing account yet — choose a plan first" };
-
-  const session = await getStripe().billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${appUrl}/app/settings/billing`,
-  });
+    .update({ status: "cancelled", updated_at: new Date().toISOString() })
+    .eq("organisation_id", orgId);
+  if (error) return { error: error.message };
   revalidatePath("/app/settings/billing");
-  return { ok: true, url: session.url };
+  return { ok: true };
 }

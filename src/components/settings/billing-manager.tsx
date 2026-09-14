@@ -3,26 +3,26 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Check, CreditCard, ExternalLink } from "lucide-react";
-import { startCheckoutAction, openPortalAction } from "@/lib/billing/actions";
+import { Check, XCircle } from "lucide-react";
+import { startCheckoutAction, cancelSubscriptionAction } from "@/lib/billing/actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface Plan { id: string; key: string; name: string; price_monthly: number; seats: number | null }
+interface Plan { id: string; key: string; name: string; price_monthly: number; currency?: string | null; seats: number | null }
 
 export function BillingManager({
   plans,
   currentPlanId,
   canManage,
-  stripeConfigured,
-  hasSubscription,
+  paymentsConfigured,
+  canCancel,
 }: {
   plans: Plan[];
   currentPlanId: string | null;
   canManage: boolean;
-  stripeConfigured: boolean;
-  hasSubscription: boolean;
+  paymentsConfigured: boolean;
+  canCancel: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -31,27 +31,34 @@ export function BillingManager({
     start(async () => {
       const res = (await startCheckoutAction(id)) as { error?: string; url?: string | null };
       if (res?.error) { toast.error(res.error); return; }
-      if (res.url) { window.location.href = res.url; return; } // to Stripe Checkout
+      if (res.url) { window.location.href = res.url; return; } // to Peach Hosted Checkout
       toast.success("Plan updated");
       router.refresh();
     });
   }
 
-  function portal() {
+  function cancel() {
     start(async () => {
-      const res = (await openPortalAction()) as { error?: string; url?: string | null };
+      const res = await cancelSubscriptionAction();
       if (res?.error) { toast.error(res.error); return; }
-      if (res.url) window.location.href = res.url;
+      toast.success("Subscription cancelled");
+      router.refresh();
     });
   }
 
-  const price = (p: Plan) => p.key === "enterprise" ? "Custom" : p.price_monthly === 0 ? "Free" : `$${(p.price_monthly / 100).toFixed(0)}/mo`;
+  const price = (p: Plan) => {
+    if (p.key === "enterprise") return "Custom";
+    if (p.price_monthly === 0) return "Free";
+    const cur = (p.currency ?? "ZAR").toUpperCase();
+    const symbol = cur === "ZAR" ? "R" : cur === "USD" ? "$" : `${cur} `;
+    return `${symbol}${(p.price_monthly / 100).toFixed(0)}/mo`;
+  };
 
   return (
     <div className="space-y-4">
-      {canManage && stripeConfigured && hasSubscription && (
-        <Button variant="outline" size="sm" onClick={portal} disabled={pending}>
-          <CreditCard className="size-4" /> Manage billing <ExternalLink className="size-3.5" />
+      {canManage && canCancel && (
+        <Button variant="outline" size="sm" onClick={cancel} disabled={pending}>
+          <XCircle className="size-4" /> Cancel subscription
         </Button>
       )}
 
@@ -72,7 +79,7 @@ export function BillingManager({
                   <a href="mailto:hello@conversa.app?subject=Enterprise%20plan"><Button variant="outline" size="sm" className="mt-4 w-full">Contact sales</Button></a>
                 ) : (
                   <Button size="sm" className="mt-4 w-full" disabled={pending} onClick={() => choose(p.id)}>
-                    {stripeConfigured ? "Choose plan" : "Switch"}
+                    {paymentsConfigured ? "Choose plan" : "Switch"}
                   </Button>
                 )
               )}
