@@ -1,4 +1,4 @@
-import { NODE_DEFS, type FlowDefinition } from "@/lib/chatbots/types";
+import { NODE_DEFS, handlesForNode, type FlowDefinition } from "@/lib/chatbots/types";
 
 export interface ValidationIssue {
   level: "error" | "warning";
@@ -30,7 +30,7 @@ export function validateFlow(def: FlowDefinition): ValidationIssue[] {
 
   for (const n of nodes) {
     const def0 = NODE_DEFS[n.type];
-    if (def0.handles.length > 0 && !(outByNode.get(n.id) ?? 0)) {
+    if (handlesForNode(n).length > 0 && !(outByNode.get(n.id) ?? 0)) {
       issues.push({ level: "warning", nodeId: n.id, message: `“${def0.label}” has no outgoing connection.` });
     }
   }

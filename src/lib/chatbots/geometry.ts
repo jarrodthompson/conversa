@@ -1,4 +1,4 @@
-import { NODE_DEFS, type FlowNode, type NodeType } from "@/lib/chatbots/types";
+import { handlesForNode, type FlowNode } from "@/lib/chatbots/types";
 
 export const NODE_W = 200;
 export const NODE_H = 68;
@@ -10,7 +10,7 @@ export function inputPoint(n: FlowNode) {
 
 /** Absolute canvas coordinate of one of a node's output handles (along bottom). */
 export function outputPoint(n: FlowNode, handleId: string) {
-  const handles = NODE_DEFS[n.type as NodeType].handles;
+  const handles = handlesForNode(n);
   const idx = Math.max(0, handles.findIndex((h) => h.id === handleId));
   const k = Math.max(1, handles.length);
   const x = n.position.x + ((idx + 1) / (k + 1)) * NODE_W;
